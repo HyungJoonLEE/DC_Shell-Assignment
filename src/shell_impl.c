@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <regex.h>
+#include <dc_posix/dc_stdio.h>
 #include "shell_impl.h"
 #include "state.h"
 #include "util.h"
@@ -9,8 +10,6 @@
 
 regex_t regex;
 regex_t * regex_setting(int num);
-char* prompt_state(const struct dc_posix_env *env, struct dc_error *err);
-
 
 
 int init_state(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
@@ -179,4 +178,39 @@ int reset_state(const struct dc_posix_env *env, struct dc_error *err, void *arg)
     }
 
     return READ_COMMANDS;
+}
+
+
+/**
+ * Prompt the user and read the command line (see read_command_line).
+ * Sets the state->current_line and current_line_length.
+ *
+ * @param env the posix environment.
+ * @param err the error object
+ * @param arg the current struct state
+ * @return SEPARATE_COMMANDS
+ */
+int read_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
+    struct state *states;
+    states = (struct state*) arg;
+
+    if (dc_error_has_no_error(err)) {
+        states->fatal_error = false;
+        dc_fputs(env, err, states->prompt, states->stdout);
+        if (dc_error_has_error(err)) {
+            states->fatal_error = true;
+            return ERROR;
+        }
+        dc_fgets(env, err, states->current_line, (int)states->current_line_length, states->stdin);
+        if (dc_error_has_error(err)) {
+            states->fatal_error = true;
+            return ERROR;
+        }
+        if (strcmp(states->prompt, "") == 0) {
+            return RESET_STATE;
+        }
+        states->current_line_length;
+
+    }
+    return SEPARATE_COMMANDS;
 }

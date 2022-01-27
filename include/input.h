@@ -19,7 +19,7 @@
  */
 
 #include <dc_posix/dc_posix_env.h>
-#include <dc_posix/dc_stdlib.h>
+#include <dc_util/strings.h>
 #include <stdio.h>
 
 /**

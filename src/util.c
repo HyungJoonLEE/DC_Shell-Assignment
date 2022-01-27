@@ -43,20 +43,10 @@ char **parse_path(const struct dc_posix_env *env, struct dc_error *err, const ch
 
         arr = realloc(arr, (string_rows + 1) * sizeof(arr));
         arr[string_rows] = NULL;
-//        free(path_copy);
+        free(path_copy);
         return arr;
     }
 }
-/**
- * Separate a path (eg. PATH environ var) into separate directories.
- * Directories are separated with a ':' character.
- * Any directories with ~ are converted to the users home directory.
- *
- * @param env the posix environment.
- * @param err the error object.
- * @param path_str the string to separate.
- * @return The directories that make up the path.
- */
 
 
 char *state_to_string(const struct dc_posix_env *env,  struct dc_error *err, const struct state *state) {
