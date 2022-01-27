@@ -65,85 +65,85 @@ static void test_init_state(const char *expected_prompt, FILE *in, FILE *out, FI
     assert_that(state.command, is_null);
 }
 
-//Ensure(shell_impl, destroy_state)
-//{
-//    test_destroy_state(true);
-//    test_destroy_state(false);
-//}
-//
-//static void test_destroy_state(bool initial_fatal)
-//{
-//    struct state state;
-//    int next_state;
-//
-//    state.stdin  = stdin;
-//    state.stdout = stdout;
-//    state.stderr = stderr;
-//    init_state(&environ, &error, &state);
-//    state.fatal_error = initial_fatal;
-//    next_state = destroy_state(&environ, &error, &state);
-//    assert_that(next_state, is_equal_to(DC_FSM_EXIT));
-//    assert_false(dc_error_has_error(&error));
-//    assert_false(state.fatal_error);
-//    assert_that(state.stdin, is_equal_to(stdin));
-//    assert_that(state.stdout, is_equal_to(stdout));
-//    assert_that(state.stderr, is_equal_to(stderr));
-//    assert_that(state.in_redirect_regex, is_null);
-//    assert_that(state.out_redirect_regex, is_null);
-//    assert_that(state.err_redirect_regex, is_null);
-//    assert_that(state.prompt, is_null);
-//    assert_that(state.path, is_null);
-//    assert_that(state.max_line_length, is_equal_to(0));
-//    assert_that(state.current_line, is_null);
-//    assert_that(state.current_line_length, is_equal_to(0));
-//    assert_that(state.command, is_null);
-//}
-//
-//Ensure(shell_impl, reset_state)
-//{
-//    unsetenv("PS1");
-//    test_reset_state("$ ", false);
-//
-//    setenv("PS1", "$$  ", true);
-//    test_reset_state("$$  ", false);
-//
-//    unsetenv("PS1");
-//    test_reset_state("$ ", true);
-//
-//    setenv("PS1", "!>", true);
-//    test_reset_state("!>", true);
-//}
-//
-//static void test_reset_state(const char *expected_prompt, bool initial_fatal)
-//{
-//    struct state state;
-//    int next_state;
-//    long line_length;
-//
-//    state.stdin  = stdin;
-//    state.stdout = stdout;
-//    state.stderr = stderr;
-//    line_length = sysconf(_SC_ARG_MAX);
-//    assert_that_expression(line_length >= 0);
-//    init_state(&environ, &error, &state);
-//    state.fatal_error = initial_fatal;
-//    next_state = reset_state(&environ, &error, &state);
-//    assert_that(next_state, is_equal_to(READ_COMMANDS));
-//    assert_false(dc_error_has_error(&error));
-//    assert_false(state.fatal_error);
-//    assert_that(state.stdin, is_equal_to(stdin));
-//    assert_that(state.stdout, is_equal_to(stdout));
-//    assert_that(state.stderr, is_equal_to(stderr));
-//    assert_that(state.in_redirect_regex, is_not_null);
-//    assert_that(state.out_redirect_regex, is_not_null);
-//    assert_that(state.err_redirect_regex, is_not_null);
-//    assert_that(state.prompt, is_equal_to_string(expected_prompt));
-//    assert_that(state.path, is_not_null);
-//    assert_that(state.max_line_length, is_equal_to(line_length));
-//    assert_that(state.current_line, is_null);
-//    assert_that(state.current_line_length, is_equal_to(0));
-//    assert_that(state.command, is_null);
-//}
+Ensure(shell_impl, destroy_state)
+{
+    test_destroy_state(true);
+    test_destroy_state(false);
+}
+
+static void test_destroy_state(bool initial_fatal)
+{
+    struct state state;
+    int next_state;
+
+    state.stdin  = stdin;
+    state.stdout = stdout;
+    state.stderr = stderr;
+    init_state(&environ, &error, &state);
+    state.fatal_error = initial_fatal;
+    next_state = destroy_state(&environ, &error, &state);
+    assert_that(next_state, is_equal_to(DC_FSM_EXIT));
+    assert_false(dc_error_has_error(&error));
+    assert_false(state.fatal_error);
+    assert_that(state.stdin, is_equal_to(stdin));
+    assert_that(state.stdout, is_equal_to(stdout));
+    assert_that(state.stderr, is_equal_to(stderr));
+    assert_that(state.in_redirect_regex, is_null);
+    assert_that(state.out_redirect_regex, is_null);
+    assert_that(state.err_redirect_regex, is_null);
+    assert_that(state.prompt, is_null);
+    assert_that(state.path, is_null);
+    assert_that(state.max_line_length, is_equal_to(0));
+    assert_that(state.current_line, is_null);
+    assert_that(state.current_line_length, is_equal_to(0));
+    assert_that(state.command, is_null);
+}
+
+Ensure(shell_impl, reset_state)
+{
+    unsetenv("PS1");
+    test_reset_state("$ ", false);
+
+    setenv("PS1", "$$  ", true);
+    test_reset_state("$$  ", false);
+
+    unsetenv("PS1");
+    test_reset_state("$ ", true);
+
+    setenv("PS1", "!>", true);
+    test_reset_state("!>", true);
+}
+
+static void test_reset_state(const char *expected_prompt, bool initial_fatal)
+{
+    struct state state;
+    int next_state;
+    long line_length;
+
+    state.stdin  = stdin;
+    state.stdout = stdout;
+    state.stderr = stderr;
+    line_length = sysconf(_SC_ARG_MAX);
+    assert_that_expression(line_length >= 0);
+    init_state(&environ, &error, &state);
+    state.fatal_error = initial_fatal;
+    next_state = reset_state(&environ, &error, &state);
+    assert_that(next_state, is_equal_to(READ_COMMANDS));
+    assert_false(dc_error_has_error(&error));
+    assert_false(state.fatal_error);
+    assert_that(state.stdin, is_equal_to(stdin));
+    assert_that(state.stdout, is_equal_to(stdout));
+    assert_that(state.stderr, is_equal_to(stderr));
+    assert_that(state.in_redirect_regex, is_not_null);
+    assert_that(state.out_redirect_regex, is_not_null);
+    assert_that(state.err_redirect_regex, is_not_null);
+    assert_that(state.prompt, is_equal_to_string(expected_prompt));
+    assert_that(state.path, is_not_null);
+    assert_that(state.max_line_length, is_equal_to(line_length));
+    assert_that(state.current_line, is_null);
+    assert_that(state.current_line_length, is_equal_to(0));
+    assert_that(state.command, is_null);
+}
 //
 //Ensure(shell_impl, read_commands)
 //{
@@ -214,8 +214,8 @@ TestSuite *shell_impl_tests(void)
 
     suite = create_test_suite();
     add_test_with_context(suite, shell_impl, init_state);
-//    add_test_with_context(suite, shell_impl, destroy_state);
-//    add_test_with_context(suite, shell_impl, reset_state);
+    add_test_with_context(suite, shell_impl, destroy_state);
+    add_test_with_context(suite, shell_impl, reset_state);
 //    add_test_with_context(suite, shell_impl, read_commands);
 //    add_test_with_context(suite, shell_impl, separate_commands);
 //    add_test_with_context(suite, shell_impl, parse_commands);

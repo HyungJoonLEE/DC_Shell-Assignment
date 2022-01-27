@@ -9,11 +9,11 @@
 
 
 char *get_prompt(const struct dc_posix_env *env, struct dc_error *err) {
-    const char *dollar = "$ ";
+    char *dollar = strdup("$ ");
     char *prompt = dc_getenv(env, "PS1");
-    if (prompt == NULL) return dollar;
-    return prompt;
+    if (!prompt) return dollar;
 
+    return prompt;
 }
 
 
@@ -43,7 +43,7 @@ char **parse_path(const struct dc_posix_env *env, struct dc_error *err, const ch
 
         arr = realloc(arr, (string_rows + 1) * sizeof(arr));
         arr[string_rows] = NULL;
-        free(path_copy);
+//        free(path_copy);
         return arr;
     }
 }

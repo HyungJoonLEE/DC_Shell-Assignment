@@ -35,7 +35,7 @@
  * @param arg the current struct state
  * @return READ_COMMANDS or INIT_ERROR
  */
-int init_state(const struct dc_posix_env *env, struct dc_error *err, struct state *arg);
+int init_state(const struct dc_posix_env *env, struct dc_error *err, void *arg);
 
 /**
  * Free any dynamically allocated memory in the state and sets variables to NULL, 0 or false.
