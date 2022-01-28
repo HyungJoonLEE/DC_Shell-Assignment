@@ -195,126 +195,126 @@ static void test_read_commands(const char *command, const char *expected_command
     free(in_buf);
 }
 
-Ensure(shell_impl, separate_commands)
-{
-    test_separate_commands("./a.out", "./a.out", SEPARATE_COMMANDS);
-    test_separate_commands("cd ~\n", "cd ~", SEPARATE_COMMANDS);
-    test_separate_commands("\n", "", RESET_STATE);
-}
-
-static void test_separate_commands(const char *command, const char *expected_command, int expected_return)
-{
-    char *in_buf;
-    char out_buf[1024];
-    FILE *in;
-    FILE *out;
-    struct state state;
-    int next_state;
-
-    in_buf = strdup(command);
-    in = fmemopen(in_buf, strlen(in_buf) + 1, "r");
-    out = fmemopen(out_buf, sizeof(out_buf), "w");
-    state.stdin = in;
-    state.stdout = out;
-    state.stderr = stderr;
-    unsetenv("PS1");
-
-    next_state = init_state(&environ, &error, &state);
-    assert_false(dc_error_has_error(&error));
-    assert_false(state.fatal_error);
-    assert_that(next_state, is_equal_to(READ_COMMANDS));
-
-    next_state = read_commands(&environ, &error, &state);
-    assert_that(next_state, is_equal_to(expected_return));
-    assert_false(state.fatal_error);
-    assert_that(state.current_line, is_equal_to_string(expected_command));
-    assert_that(state.current_line_length, is_equal_to(strlen(expected_command)));
-
-    if(expected_return == RESET_STATE)
-    {
-        fclose(in);
-        fclose(out);
-        free(in_buf);
-        destroy_state(&environ, &error, &state);
-        return;
-    }
-
-    next_state = separate_commands(&environ, &error, &state);
-    assert_that(next_state, is_equal_to(PARSE_COMMANDS));
-    assert_false(state.fatal_error);
-    assert_that(state.command, is_not_null);
-    assert_that(state.command->line, is_equal_to_string(state.current_line));
-    assert_that(state.command->line, is_not_equal_to(state.current_line));
-    assert_that(state.command->command, is_null);
-    assert_that(state.command->argc, is_equal_to(0));
-    assert_that(state.command->argv, is_null);
-    assert_that(state.command->stdin_file, is_null);
-    assert_that(state.command->stdout_file, is_null);
-    assert_false(state.command->stdout_overwrite);
-    assert_that(state.command->stderr_file, is_null);
-    assert_false(state.command->stderr_overwrite);
-    assert_that(state.command->exit_code, is_equal_to(0));
-    fclose(in);
-    fclose(out);
-    free(in_buf);
-    destroy_state(&environ, &error, &state);
-}
-
-Ensure(shell_impl, parse_commands)
-{
-    test_parse_commands("hello\n");
-}
-
-static void test_parse_commands(const char *command)
-{
-    char *in_buf;
-    char out_buf[1024];
-    FILE *in;
-    FILE *out;
-    struct state state;
-    int next_state;
-
-    in_buf = strdup(command);
-    in = fmemopen(in_buf, strlen(in_buf) + 1, "r");
-    out = fmemopen(out_buf, sizeof(out_buf), "w");
-    state.stdin = in;
-    state.stdout = out;
-    state.stderr = stderr;
-    unsetenv("PS1");
-
-    next_state = init_state(&environ, &error, &state);
-    assert_false(dc_error_has_error(&error));
-    assert_false(state.fatal_error);
-    assert_that(next_state, is_equal_to(READ_COMMANDS));
-
-    next_state = read_commands(&environ, &error, &state);
-    assert_that(next_state, is_equal_to(SEPARATE_COMMANDS));
-    assert_false(state.fatal_error);
-
-    next_state = separate_commands(&environ, &error, &state);
-    assert_that(next_state, is_equal_to(PARSE_COMMANDS));
-
-    next_state = parse_commands(&environ, &error, &state);
-    assert_that(next_state, is_equal_to(EXECUTE_COMMANDS));
-}
-
-Ensure(shell_impl, execute_commands)
-{
-    // cd /
-    // cd ~
-    // cd ..
-    // cd
-    // cd x.txt
-    // exit
-}
-
-Ensure(shell_impl, do_exit)
-{
-}
-
-Ensure(shell_impl, handle_error)
-{
-}
+//Ensure(shell_impl, separate_commands)
+//{
+//    test_separate_commands("./a.out", "./a.out", SEPARATE_COMMANDS);
+//    test_separate_commands("cd ~\n", "cd ~", SEPARATE_COMMANDS);
+//    test_separate_commands("\n", "", RESET_STATE);
+//}
+//
+//static void test_separate_commands(const char *command, const char *expected_command, int expected_return)
+//{
+//    char *in_buf;
+//    char out_buf[1024];
+//    FILE *in;
+//    FILE *out;
+//    struct state state;
+//    int next_state;
+//
+//    in_buf = strdup(command);
+//    in = fmemopen(in_buf, strlen(in_buf) + 1, "r");
+//    out = fmemopen(out_buf, sizeof(out_buf), "w");
+//    state.stdin = in;
+//    state.stdout = out;
+//    state.stderr = stderr;
+//    unsetenv("PS1");
+//
+//    next_state = init_state(&environ, &error, &state);
+//    assert_false(dc_error_has_error(&error));
+//    assert_false(state.fatal_error);
+//    assert_that(next_state, is_equal_to(READ_COMMANDS));
+//
+//    next_state = read_commands(&environ, &error, &state);
+//    assert_that(next_state, is_equal_to(expected_return));
+//    assert_false(state.fatal_error);
+//    assert_that(state.current_line, is_equal_to_string(expected_command));
+//    assert_that(state.current_line_length, is_equal_to(strlen(expected_command)));
+//
+//    if(expected_return == RESET_STATE)
+//    {
+//        fclose(in);
+//        fclose(out);
+//        free(in_buf);
+//        destroy_state(&environ, &error, &state);
+//        return;
+//    }
+//
+//    next_state = separate_commands(&environ, &error, &state);
+//    assert_that(next_state, is_equal_to(PARSE_COMMANDS));
+//    assert_false(state.fatal_error);
+//    assert_that(state.command, is_not_null);
+//    assert_that(state.command->line, is_equal_to_string(state.current_line));
+//    assert_that(state.command->line, is_not_equal_to(state.current_line));
+//    assert_that(state.command->command, is_null);
+//    assert_that(state.command->argc, is_equal_to(0));
+//    assert_that(state.command->argv, is_null);
+//    assert_that(state.command->stdin_file, is_null);
+//    assert_that(state.command->stdout_file, is_null);
+//    assert_false(state.command->stdout_overwrite);
+//    assert_that(state.command->stderr_file, is_null);
+//    assert_false(state.command->stderr_overwrite);
+//    assert_that(state.command->exit_code, is_equal_to(0));
+//    fclose(in);
+//    fclose(out);
+//    free(in_buf);
+//    destroy_state(&environ, &error, &state);
+//}
+//
+//Ensure(shell_impl, parse_commands)
+//{
+//    test_parse_commands("hello\n");
+//}
+//
+//static void test_parse_commands(const char *command)
+//{
+//    char *in_buf;
+//    char out_buf[1024];
+//    FILE *in;
+//    FILE *out;
+//    struct state state;
+//    int next_state;
+//
+//    in_buf = strdup(command);
+//    in = fmemopen(in_buf, strlen(in_buf) + 1, "r");
+//    out = fmemopen(out_buf, sizeof(out_buf), "w");
+//    state.stdin = in;
+//    state.stdout = out;
+//    state.stderr = stderr;
+//    unsetenv("PS1");
+//
+//    next_state = init_state(&environ, &error, &state);
+//    assert_false(dc_error_has_error(&error));
+//    assert_false(state.fatal_error);
+//    assert_that(next_state, is_equal_to(READ_COMMANDS));
+//
+//    next_state = read_commands(&environ, &error, &state);
+//    assert_that(next_state, is_equal_to(SEPARATE_COMMANDS));
+//    assert_false(state.fatal_error);
+//
+//    next_state = separate_commands(&environ, &error, &state);
+//    assert_that(next_state, is_equal_to(PARSE_COMMANDS));
+//
+//    next_state = parse_commands(&environ, &error, &state);
+//    assert_that(next_state, is_equal_to(EXECUTE_COMMANDS));
+//}
+//
+//Ensure(shell_impl, execute_commands)
+//{
+//    // cd /
+//    // cd ~
+//    // cd ..
+//    // cd
+//    // cd x.txt
+//    // exit
+//}
+//
+//Ensure(shell_impl, do_exit)
+//{
+//}
+//
+//Ensure(shell_impl, handle_error)
+//{
+//}
 
 TestSuite *shell_impl_tests(void)
 {
@@ -325,11 +325,11 @@ TestSuite *shell_impl_tests(void)
     add_test_with_context(suite, shell_impl, destroy_state);
     add_test_with_context(suite, shell_impl, reset_state);
     add_test_with_context(suite, shell_impl, read_commands);
-    add_test_with_context(suite, shell_impl, separate_commands);
-    add_test_with_context(suite, shell_impl, parse_commands);
-    add_test_with_context(suite, shell_impl, execute_commands);
-    add_test_with_context(suite, shell_impl, do_exit);
-    add_test_with_context(suite, shell_impl, handle_error);
+//    add_test_with_context(suite, shell_impl, separate_commands);
+//    add_test_with_context(suite, shell_impl, parse_commands);
+//    add_test_with_context(suite, shell_impl, execute_commands);
+//    add_test_with_context(suite, shell_impl, do_exit);
+//    add_test_with_context(suite, shell_impl, handle_error);
 
     return suite;
 }
