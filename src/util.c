@@ -7,18 +7,32 @@
 #include <dc_posix/dc_stdlib.h>
 
 
-
 char *get_prompt(const struct dc_posix_env *env, struct dc_error *err) {
-    char *dollar = strdup("$ ");
+    const char *dollar = "$ ";
     char *prompt = dc_getenv(env, "PS1");
-    if (!prompt) return dollar;
+    char *dup_dollar = NULL;
+    char *dup_prompt = NULL;
 
-    return prompt;
+    if (!prompt) {
+        dup_dollar = strdup(dollar);
+        return dup_dollar;
+    }
+
+    dup_prompt = strdup(prompt);
+    return dup_prompt;
 }
 
 
 char *get_path(const struct dc_posix_env *env, struct dc_error *err) {
-    return dc_getenv(env, "PATH");
+    char *prompt = dc_getenv(env, "PATH");
+
+    if (!prompt) {
+        return NULL;
+    }
+
+    char *dup_prompt;
+    dup_prompt = strdup(prompt);
+    return dup_prompt;
 }
 
 
