@@ -216,6 +216,7 @@ static void test_parse_command(const char *expected_line,
     free(expanded_stdin_file);
     free(expanded_stdout_file);
     free(expanded_stderr_file);
+    destroy_state(&environ, &error, &state);
 }
 
 static void expand_path(const char *expected_file, char **expanded_file)

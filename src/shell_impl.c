@@ -4,6 +4,8 @@
 #include <regex.h>
 #include <dc_posix/dc_stdio.h>
 #include <dc_posix/dc_unistd.h>
+#include <dc_util/filesystem.h>
+#include <dc_posix/dc_string.h>
 #include "shell_impl.h"
 #include "state.h"
 #include "util.h"
@@ -76,32 +78,7 @@ int init_state(const struct dc_posix_env *env, struct dc_error *err, void *arg) 
     }
 
 
-    states->stdin = stdin;
-    if (dc_error_has_error(err)) {
-        states->fatal_error = true;
-        return ERROR;
-    }
-
-
-    states->stdout = stdout;
-    if (dc_error_has_error(err)) {
-        states->fatal_error = true;
-        return ERROR;
-    }
-
-
-    states->stderr = stderr;
-    if (dc_error_has_error(err)) {
-        states->fatal_error = true;
-        return ERROR;
-    }
-
-
     states->command = NULL;
-    if (dc_error_has_error(err)) {
-        states->fatal_error = true;
-        return ERROR;
-    }
 
     return READ_COMMANDS;
 }
@@ -143,9 +120,6 @@ int destroy_state(const struct dc_posix_env *env, struct dc_error *err, void *ar
 
     if (!dc_error_has_error(err)) {
         states->fatal_error = false;
-        states->stdin = stdin;
-        states->stdout = stdout;
-        states->stderr = stderr;
         states->in_redirect_regex = NULL;
         states->out_redirect_regex = NULL;
         states->err_redirect_regex = NULL;
@@ -166,9 +140,6 @@ int reset_state(const struct dc_posix_env *env, struct dc_error *err, void *arg)
 
     if (!dc_error_has_error(err)) {
         states->fatal_error = false;
-        states->stdin = stdin;
-        states->stdout = stdout;
-        states->stderr = stderr;
         states->in_redirect_regex = regex_setting(0);
         states->out_redirect_regex = regex_setting(1);
         states->err_redirect_regex = regex_setting(2);
@@ -177,10 +148,8 @@ int reset_state(const struct dc_posix_env *env, struct dc_error *err, void *arg)
         states->max_line_length = (size_t) sysconf(_SC_ARG_MAX);
         states->current_line = NULL;
         states->current_line_length = 0;
-//        free(states->command->line);
-//        free(states->command->command);
-//        states->command->argc = 0;
-//        free(states->
+
+        free(states->command);
         states->command = NULL;
     }
 
@@ -201,24 +170,37 @@ int read_commands(const struct dc_posix_env *env, struct dc_error *err, void *ar
     struct state *states;
     states = (struct state*) arg;
 
+    size_t len = 0;
+
     if (dc_error_has_no_error(err)) {
-        dc_fputs(env, err, states->prompt, states->stdout);
-//        fprintf(states->stdout, "%s", get_prompt(env, err));
-        if (dc_error_has_error(err)) {
-//            printf("%d", run_shell(env, err));
-            states->fatal_error = true;
-            return ERROR;
-        }
-//        dc_read(env, err, states->stdin, states->current_line, states->current_line_length);
-        dc_fgets(env, err, states->current_line, (int)states->current_line_length, states->stdin);
+
+        states->fatal_error = false;
+
+        char *pwd = dc_get_working_dir(env, err);
         if (dc_error_has_error(err)) {
             states->fatal_error = true;
             return ERROR;
-        }
-        if (read_command_line(env, err, states->stdin, &states->current_line_length)) {
-            return RESET_STATE;
         }
 
-        return SEPARATE_COMMANDS;
+        fprintf(states->stdout, "[%s] %s", pwd, states->prompt);
+        if (dc_error_has_error(err)) {
+            states->fatal_error = true;
+            return ERROR;
+        }
+        char *rcl = read_command_line(env, err, states->stdin, &len);
+
+        if (dc_error_has_error(err)) {
+            states->fatal_error = true;
+            return ERROR;
+        }
+
+        states->current_line = strdup(rcl);
+        states->current_line_length = dc_strlen(env, rcl);
+        free(rcl);
+
+        if (len == 0) {
+            return RESET_STATE;
+        }
     }
+    return SEPARATE_COMMANDS; // 4
 }
