@@ -20,6 +20,7 @@
 
 #include <dc_fsm/fsm.h>
 #include <dc_posix/dc_posix_env.h>
+#include <stdio.h>
 
 /*! \enum state
     \brief The possible FSM states.
@@ -44,9 +45,13 @@ enum shell_states
  * Run the shell FSM.
  *
  * @param env the posix environment.
- * @param err the error object
+ * @param error the error object
+ * @param in the keyboard (stdin) file
+ * @param out the keyboard (stdout) file
+ * @param err the keyboard (stderr) file
+ *
  * @return the exit code from the shell.
  */
-int run_shell(const struct dc_posix_env *env, struct dc_error *err);
+int run_shell(const struct dc_posix_env *env, struct dc_error *error, FILE *in, FILE *out, FILE *err);
 
 #endif // DC_SHELL_SHELL_H
