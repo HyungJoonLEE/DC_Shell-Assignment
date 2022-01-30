@@ -204,3 +204,57 @@ int read_commands(const struct dc_posix_env *env, struct dc_error *err, void *ar
     }
     return SEPARATE_COMMANDS; // 4
 }
+
+
+int separate_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
+    struct state *states;
+    states = (struct state*) arg;
+    struct state new_states;
+
+    if (dc_error_has_no_error(err)) {
+        states->fatal_error = false;
+
+        new_states.command = dc_calloc(env, err, 1, sizeof(*states->command));
+        states->command = new_states.command;
+
+
+        if (dc_error_has_error(err)) {
+            free(new_states.command);
+            states->fatal_error = true;
+            return ERROR;
+        }
+
+        states->command->line = strdup(states->current_line);
+
+        if (dc_error_has_error(err)) {
+            free(new_states.command);
+            free(states->current_line);
+            states->fatal_error = true;
+            return ERROR;
+        }
+
+//        new_states.command->line = NULL;
+        new_states.command->command = NULL;
+        new_states.command->argc = 0;
+        new_states.command->argv = NULL;
+        new_states.command->stdin_file = NULL;
+        new_states.command->stdout_file = NULL;
+        new_states.command->stdout_overwrite = false;
+        new_states.command->stderr_file = NULL;
+        new_states.command->stderr_overwrite = false;
+        new_states.command->exit_code = 0;
+
+        if (dc_error_has_error(err)) {
+            free(new_states.command);
+            states->fatal_error = true;
+            return ERROR;
+        }
+    }
+
+    return PARSE_COMMANDS;
+}
+
+
+int parse_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
+
+}
