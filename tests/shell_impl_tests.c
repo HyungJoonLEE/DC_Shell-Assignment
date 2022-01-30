@@ -12,6 +12,7 @@ static void test_read_commands(const char *command, const char *expected_command
 static void test_separate_commands(const char *command, const char *expected_command, int expected_return);
 static void test_parse_commands(const char *command, char *expected_command, size_t expected_argc);
 static void test_execute_command(const char *command, int expected_next_state, const char *expected_exit_code, const char *expected_error_message);
+static void test_handle_error(const char *current_line, bool is_fatal, int expected_error_code, const char *message, const char *expected_error_message, int expected_next_state);
 
 Describe(shell_impl);
 
@@ -260,32 +261,32 @@ static void test_separate_commands(const char *command, const char *expected_com
     free(in_buf);
     destroy_state(&environ, &error, &state);
 }
-//
-//Ensure(shell_impl, parse_commands)
-//{
-//    test_parse_commands("hello\n", "hello", 1);
-//    test_parse_commands("./a.out a b c\n", "./a.out", 4);
-//}
-//
-//static void test_parse_commands(const char *command, char *expected_command, size_t expected_argc)
-//{
-//    char *in_buf;
-//    char out_buf[1024];
-//    FILE *in;
-//    FILE *out;
-//    struct state state;
-//    int next_state;
-//
-//    in_buf = strdup(command);
-//    in = fmemopen(in_buf, strlen(in_buf) + 1, "r");
-//    out = fmemopen(out_buf, sizeof(out_buf), "w");
-//    state.stdin = in;
-//    state.stdout = out;
-//    state.stderr = stderr;
-//    unsetenv("PS1");
-//
-//    next_state = init_state(&environ, &error, &state);
-//    assert_false(dc_error_has_error(&error));
+
+Ensure(shell_impl, parse_commands)
+{
+    test_parse_commands("hello\n", "hello", 1);
+    test_parse_commands("./a.out a b c\n", "./a.out", 4);
+}
+
+static void test_parse_commands(const char *command, char *expected_command, size_t expected_argc)
+{
+    char *in_buf;
+    char out_buf[1024];
+    FILE *in;
+    FILE *out;
+    struct state state;
+    int next_state;
+
+    in_buf = strdup(command);
+    in = fmemopen(in_buf, strlen(in_buf) + 1, "r");
+    out = fmemopen(out_buf, sizeof(out_buf), "w");
+    state.stdin = in;
+    state.stdout = out;
+    state.stderr = stderr;
+    unsetenv("PS1");
+
+    next_state = init_state(&environ, &error, &state);
+    assert_false(dc_error_has_error(&error));
 //    assert_false(state.fatal_error);
 //    assert_that(next_state, is_equal_to(READ_COMMANDS));
 //
@@ -303,7 +304,7 @@ static void test_separate_commands(const char *command, const char *expected_com
 //    assert_that(state.command->argc, is_equal_to(expected_argc));
 //
 //    destroy_state(&environ, &error, &state);
-//}
+}
 //
 //Ensure(shell_impl, execute_commands)
 //{
@@ -318,6 +319,8 @@ static void test_separate_commands(const char *command, const char *expected_com
 //    test_execute_command("cd /dev/null", RESET_STATE, "1\n", "/dev/null: is not a directory\n");
 //    current_working_dir = dc_get_working_dir(&environ, &error);
 //    assert_that(current_working_dir, is_equal_to_string("/"));
+//
+//    test_execute_command("ls", RESET_STATE, "0\n", "");
 //}
 //
 //static void test_execute_command(const char *command, int expected_next_state, const char *expected_exit_code, const char *expected_error_message)
@@ -390,6 +393,46 @@ static void test_separate_commands(const char *command, const char *expected_com
 //
 //Ensure(shell_impl, handle_error)
 //{
+//    test_handle_error(NULL, true, 4, "foo", "internal error (4) foo\n", DESTROY_STATE);
+//    test_handle_error("ls", false, 6, "bar car", "internal error (6) bar car: \"ls\"\n", RESET_STATE);
+//    test_handle_error("ls -l", false, 897, "bar car", "internal error (897) bar car: \"ls -l\"\n", RESET_STATE);
+//}
+//
+//static void test_handle_error(const char *current_line, bool is_fatal, int expected_error_code, const char *message, const char *expected_error_message, int expected_next_state)
+//{
+//    char out_buf[1024];
+//    char err_buf[1024];
+//    FILE *out_file;
+//    FILE *err_file;
+//    struct state state;
+//    int next_state;
+//    struct dc_error err;
+//
+//    memset(out_buf, 0, sizeof(out_buf));
+//    memset(err_buf, 0, sizeof(err_buf));
+//    out_file = fmemopen(out_buf, sizeof(out_buf), "w");
+//    err_file = fmemopen(err_buf, sizeof(err_buf), "w");
+//    state.stdout = out_file;
+//    state.stderr = err_file;
+//    init_state(&environ, &error, &state);
+//    dc_error_init(&err, NULL);
+//    err.err_code = expected_error_code;
+//    err.message = strdup(message);
+//
+//    if(current_line != NULL)
+//    {
+//        state.current_line = strdup(current_line);
+//        state.current_line_length = strlen(state.current_line);
+//    }
+//
+//    state.fatal_error = is_fatal;
+//    next_state = handle_error(&environ, &err, &state);
+//    assert_that(next_state, is_equal_to(expected_next_state));
+//    assert_that(out_buf, is_equal_to_string(""));
+//    assert_that(err_buf, is_equal_to_string(expected_error_message));
+//    fclose(out_file);
+//    fclose(err_file);
+//    dc_error_reset(&err);
 //}
 
 TestSuite *shell_impl_tests(void)
@@ -397,12 +440,12 @@ TestSuite *shell_impl_tests(void)
     TestSuite *suite;
 
     suite = create_test_suite();
-//    add_test_with_context(suite, shell_impl, init_state);
-//    add_test_with_context(suite, shell_impl, destroy_state);
-//    add_test_with_context(suite, shell_impl, reset_state);
-//    add_test_with_context(suite, shell_impl, read_commands);
+    add_test_with_context(suite, shell_impl, init_state);
+    add_test_with_context(suite, shell_impl, destroy_state);
+    add_test_with_context(suite, shell_impl, reset_state);
+    add_test_with_context(suite, shell_impl, read_commands);
     add_test_with_context(suite, shell_impl, separate_commands);
-//    add_test_with_context(suite, shell_impl, parse_commands);
+    add_test_with_context(suite, shell_impl, parse_commands);
 //    add_test_with_context(suite, shell_impl, execute_commands);
 //    add_test_with_context(suite, shell_impl, do_exit);
 //    add_test_with_context(suite, shell_impl, handle_error);

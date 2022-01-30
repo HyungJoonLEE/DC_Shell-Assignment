@@ -256,5 +256,17 @@ int separate_commands(const struct dc_posix_env *env, struct dc_error *err, void
 
 
 int parse_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
+    struct state *states;
+    states = (struct state*) arg;
 
+    if (dc_error_has_no_error(err)) {
+        states->fatal_error = false;
+
+        if (dc_error_has_error(err)) {
+            states->fatal_error = true;
+            return ERROR;
+        }
+
+
+    }
 }
