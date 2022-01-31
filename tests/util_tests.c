@@ -25,7 +25,7 @@ AfterEach(util)
 
 Ensure(util, get_prompt)
 {
-    const char *prompt;
+    char *prompt;
 
     unsetenv("PS1");
     prompt = get_prompt(&environ, &error);

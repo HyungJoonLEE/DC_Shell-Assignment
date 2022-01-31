@@ -10,7 +10,7 @@ static void test_destroy_state(bool initial_fatal);
 static void test_reset_state(const char *expected_prompt, bool initial_fatal);
 static void test_read_commands(const char *command, const char *expected_command, int expected_return);
 static void test_separate_commands(const char *command, const char *expected_command, int expected_return);
-static void test_parse_commands(const char *command, char *expected_command, size_t expected_argc);
+static void test_parse_commands(const char *command, const char *expected_command, size_t expected_argc);
 static void test_execute_command(const char *command, int expected_next_state, const char *expected_exit_code, const char *expected_error_message);
 static void test_handle_error(const char *current_line, bool is_fatal, int expected_error_code, const char *message, const char *expected_error_message, int expected_next_state);
 
@@ -186,6 +186,8 @@ static void test_read_commands(const char *command, const char *expected_command
     // [current working directory] state.prompt
     prompt = malloc(1 + strlen(cwd) + 1 + 2 + strlen(state.prompt) + 1);
     sprintf(prompt, "[%s] %s", cwd, state.prompt);
+
+    fflush(out);
     assert_that(out_buf, is_equal_to_string(prompt));
     assert_that(state.current_line, is_equal_to_string(expected_command));
     assert_that(state.current_line_length, is_equal_to(strlen(expected_command)));
@@ -229,6 +231,7 @@ static void test_separate_commands(const char *command, const char *expected_com
     next_state = read_commands(&environ, &error, &state);
     assert_that(next_state, is_equal_to(expected_return));
     assert_false(state.fatal_error);
+
     assert_that(state.current_line, is_equal_to_string(expected_command));
     assert_that(state.current_line_length, is_equal_to(strlen(expected_command)));
 
@@ -268,7 +271,7 @@ Ensure(shell_impl, parse_commands)
     test_parse_commands("./a.out a b c\n", "./a.out", 4);
 }
 
-static void test_parse_commands(const char *command, char *expected_command, size_t expected_argc)
+static void test_parse_commands(const char *command, const char *expected_command, size_t expected_argc)
 {
     char *in_buf;
     char out_buf[1024];
@@ -287,23 +290,27 @@ static void test_parse_commands(const char *command, char *expected_command, siz
 
     next_state = init_state(&environ, &error, &state);
     assert_false(dc_error_has_error(&error));
-//    assert_false(state.fatal_error);
-//    assert_that(next_state, is_equal_to(READ_COMMANDS));
-//
-//    next_state = read_commands(&environ, &error, &state);
-//    assert_that(next_state, is_equal_to(SEPARATE_COMMANDS));
-//    assert_false(state.fatal_error);
-//
-//    next_state = separate_commands(&environ, &error, &state);
-//    assert_that(next_state, is_equal_to(PARSE_COMMANDS));
-//
-//    next_state = parse_commands(&environ, &error, &state);
-//    assert_that(next_state, is_equal_to(EXECUTE_COMMANDS));
-//
+    assert_false(state.fatal_error);
+    assert_that(next_state, is_equal_to(READ_COMMANDS));
+
+    next_state = read_commands(&environ, &error, &state);
+    assert_that(next_state, is_equal_to(SEPARATE_COMMANDS));
+    assert_false(state.fatal_error);
+
+    next_state = separate_commands(&environ, &error, &state);
+    assert_that(next_state, is_equal_to(PARSE_COMMANDS));
+
+    next_state = parse_commands(&environ, &error, &state);
+    assert_that(next_state, is_equal_to(EXECUTE_COMMANDS));
+    printf("====O==== >> %s\n", state.command->command);
+    printf("========= >> %s\n", expected_command);
 //    assert_that(state.command->command, is_equal_to_string(expected_command));
 //    assert_that(state.command->argc, is_equal_to(expected_argc));
 //
 //    destroy_state(&environ, &error, &state);
+//    free(in_buf);
+//    fclose(in);
+//    fclose(out);
 }
 //
 //Ensure(shell_impl, execute_commands)
@@ -315,10 +322,12 @@ static void test_parse_commands(const char *command, char *expected_command, siz
 //    test_execute_command("cd /", RESET_STATE, "0\n", "");
 //    current_working_dir = dc_get_working_dir(&environ, &error);
 //    assert_that(current_working_dir, is_equal_to_string("/"));
+//    free(current_working_dir);
 //
 //    test_execute_command("cd /dev/null", RESET_STATE, "1\n", "/dev/null: is not a directory\n");
 //    current_working_dir = dc_get_working_dir(&environ, &error);
 //    assert_that(current_working_dir, is_equal_to_string("/"));
+//    free(current_working_dir);
 //
 //    test_execute_command("ls", RESET_STATE, "0\n", "");
 //}
@@ -335,6 +344,8 @@ static void test_parse_commands(const char *command, char *expected_command, siz
 //    int next_state;
 //
 //    in_buf = strdup(command);
+//    memset(out_buf, 0, sizeof(out_buf));
+//    memset(err_buf, 0, sizeof(err_buf));
 //    in = fmemopen(in_buf, strlen(in_buf) + 1, "r");
 //    out = fmemopen(out_buf, sizeof(out_buf), "w");
 //    err = fmemopen(err_buf, sizeof(out_buf), "w");
@@ -365,10 +376,16 @@ static void test_parse_commands(const char *command, char *expected_command, siz
 //
 //    next_state = execute_commands(&environ, &error, &state);
 //    assert_that(next_state, is_equal_to(expected_next_state));
+//    fflush(out);
 //    assert_that(out_buf, is_equal_to_string(expected_exit_code));
+//    fflush(err);
 //    assert_that(err_buf, is_equal_to_string(expected_error_message));
 //
 //    destroy_state(&environ, &error, &state);
+//    fclose(in);
+//    fclose(out);
+//    fclose(err);
+//    free(in_buf);
 //}
 //
 //Ensure(shell_impl, do_exit)
@@ -428,10 +445,13 @@ static void test_parse_commands(const char *command, char *expected_command, siz
 //    state.fatal_error = is_fatal;
 //    next_state = handle_error(&environ, &err, &state);
 //    assert_that(next_state, is_equal_to(expected_next_state));
+//    fflush(out_file);
 //    assert_that(out_buf, is_equal_to_string(""));
+//    fflush(err_file);
 //    assert_that(err_buf, is_equal_to_string(expected_error_message));
 //    fclose(out_file);
 //    fclose(err_file);
+//    destroy_state(&environ, &error, &state);
 //    dc_error_reset(&err);
 //}
 
