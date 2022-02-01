@@ -18,35 +18,41 @@ void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct s
     if (strstr(after_err_reg, ">>") != NULL) {
         command->stderr_overwrite = true;
     }
+    printf("1st regex :%s\n", after_err_reg);
 
-//    printf("1st regex %s\n", after_err_reg);
-    char* after_err_reg_2 = strdup(regex_match(after_err_reg, 3));
-    if (strcmp(after_err_reg_2, "") == 0) {
+    if (strcmp(after_err_reg, "") == 0) {
         command->stderr_file = NULL;
     }
-//    command->stderr_file = after_err_reg_2;
-//    printf("2nd regex %s\n", after_err_reg_2);
-    command->stderr_file = wrd_process(after_err_reg_2);
+    else {
+        char* after_err_reg_2 = strdup(regex_match(after_err_reg, 3));
+        if (strcmp(after_err_reg_2, "") == 0) {
+            command->stderr_file = NULL;
+        }
+        command->stderr_file = after_err_reg_2;
+        printf("2nd regex :%s\n", after_err_reg_2);
+        command->stderr_file = wrd_process(after_err_reg_2);
+        free(after_err_reg_2);
+    }
     free(after_err_reg);
-    free(after_err_reg_2);
 
 
 
-    char* after_out_reg = strdup(regex_match(command->line, 1));
-    if (strstr(after_out_reg, ">>") != NULL) {
-        command->stdout_overwrite = true;
-    }
-        printf("1st regex :%s\n", after_out_reg);
 
-    char* after_out_reg_2 = strdup(regex_match(after_out_reg, 4));
-    if (strcmp(after_out_reg_2, "") == 0) {
-        command->stdout_file = NULL;
-    }
-    command->stdout_file = after_out_reg_2;
-    printf("2nd regex :%s\n", after_out_reg_2);
-    command->stdout_file = wrd_process(after_out_reg_2);
-    free(after_out_reg);
-    free(after_out_reg_2);
+//    char* after_out_reg = strdup(regex_match(command->line, 1));
+//    if (strstr(after_out_reg, ">>") != NULL) {
+//        command->stdout_overwrite = true;
+//    }
+//        printf("1st regex :%s\n", after_out_reg);
+//
+//    char* after_out_reg_2 = strdup(regex_match(after_out_reg, 4));
+//    if (strcmp(after_out_reg_2, "") == 0) {
+//        command->stdout_file = NULL;
+//    }
+//    command->stdout_file = after_out_reg_2;
+//    printf("2nd regex :%s\n", after_out_reg_2);
+//    command->stdout_file = wrd_process(after_out_reg_2);
+//    free(after_out_reg);
+//    free(after_out_reg_2);
 
     /**
      * FREE <tokenize_command>
@@ -108,6 +114,9 @@ char* regex_match(char* string, int num) {
 //        printf("%s\n", str);
 //        free(str);
         return str;
+    }
+    else {
+        return strdup("");
     }
 }
 
