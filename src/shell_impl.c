@@ -17,6 +17,7 @@ regex_t regex;
 regex_t * regex_setting(int num);
 
 
+
 int init_state(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
     struct state *states;
     states = (struct state*) arg;
@@ -256,42 +257,5 @@ int separate_commands(const struct dc_posix_env *env, struct dc_error *err, void
 }
 
 
-int parse_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
-    struct state *states;
-    states = (struct state*) arg;
-
-    regex_t regex;
 
 
-
-    if (dc_error_has_no_error(err)) {
-        states->fatal_error = false;
-
-        if (dc_error_has_error(err)) {
-            states->fatal_error = true;
-            return ERROR;
-        }
-        states->command->command = strdup(states->current_line);
-        if (dc_error_has_error(err)) {
-            free(states->command->command);
-            states->fatal_error = true;
-            return ERROR;
-        }
-
-
-/**
- *  Find the stderr redirect via the state.err_redirect_regex
- *      if regex matches
- *          if >> is present set state.command.stderr_overwrite to true
- */
-        regex_t *regex_err = regex_setting(2);
-        int match_result;
-        match_result = regexec(regex_err, (const char *) states->stderr, 0, NULL, 0);
-        if (!match_result) {    // match
-            states->command->stdout_overwrite = true;
-        }
-
-    }
-
-    return EXECUTE_COMMANDS;
-}
