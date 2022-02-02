@@ -10,8 +10,8 @@ char* regex_match(char* string, int num);
 size_t argc_count(char* string);
 char **parse_space(const struct dc_posix_env *env, struct dc_error *err, const char *path_str);
 char* wrd_process(char* string);
+size_t wrd_count(char* string);
 char* ltrim(char *s);
-
 
 
 void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command) {
@@ -103,17 +103,23 @@ void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct s
     free(after_in_reg);
 
 
+    // command->command
+    char* after_in = strdup(regex_match(command->line, 0));
+    size_t len3 = strlen(command->line) - strlen(after_in) + 1;
+    char command_arr[len3];
+    strncpy(command_arr, command->line, len3);
+    command_arr[len3] = '\0';
+//    printf("command_arr = %s\n", command_arr);
+    strtok(command_arr, " ");
+//    printf("command_arr = %s\n", command_arr);
+//    printf("len : %d\n", strlen(command_arr));
+    command->command = strdup(command_arr);
+    free(after_in);
 
 
+    // NEED TO WORK FROM HERE
+    command->argc = wrd_count(command->line) + 1;
 
-
-    /**
-     * FREE <tokenize_command>
-     */
-//    char *user_input = strdup(command->line); // FREE
-//    command->command = tokenize(user_input);
-//    command->argc =
-    command->argv = calloc(command->argc, 0); // FREE
 
 }
 
@@ -192,6 +198,20 @@ char* wrd_process(char* string) {
 }
 
 
+size_t wrd_count(char* string) {
+    wordexp_t exp;
+    int status;
+    size_t count = 0;
+
+    status = wordexp(string, &exp, 0);
+    if (status == 0) {
+        count = exp.we_wordc;
+        wordfree(&exp);
+    }
+    return count;
+}
+
+
 char* ltrim(char *s) {
     char* begin;
     begin = s;
@@ -206,9 +226,3 @@ char* ltrim(char *s) {
     }
     return s;
 }
-
-
-
-
-
-

@@ -218,9 +218,9 @@ static void test_parse_command(const char *expected_line,
     state.command = calloc(1, sizeof(struct command));
     state.command->line = strdup(expected_line);
     parse_command(&environ, &error, &state, state.command);
-//    assert_that(state.command->line, is_equal_to_string(expected_line));
-//    assert_that(state.command->command, is_equal_to_string(expected_command));
-//    assert_that(state.command->argc, is_equal_to(expected_argc));
+    assert_that(state.command->line, is_equal_to_string(expected_line));
+    assert_that(state.command->command, is_equal_to_string(expected_command));
+    assert_that(state.command->argc, is_equal_to(expected_argc));
 //
 //    assert_that(state.command->argv[0], is_null);
 //    assert_that(state.command->argv[expected_argc], is_null);
