@@ -230,9 +230,9 @@ static void test_parse_command(const char *expected_line,
 //        assert_that(state.command->argv[i], is_equal_to_string(expected_argv[i]));
 //    }
 
-//    assert_that(state.command->stdin_file, is_equal_to_string(expanded_stdin_file));
-//    assert_that(state.command->stdout_file, is_equal_to_string(expanded_stdout_file));
-//    assert_that(state.command->stdout_overwrite, is_equal_to(expected_stdout_overwrite));
+    assert_that(state.command->stdin_file, is_equal_to_string(expanded_stdin_file));
+    assert_that(state.command->stdout_file, is_equal_to_string(expanded_stdout_file));
+    assert_that(state.command->stdout_overwrite, is_equal_to(expected_stdout_overwrite));
     assert_that(state.command->stderr_file, is_equal_to_string(expanded_stderr_file));
     assert_that(state.command->stderr_overwrite, is_equal_to(expected_stderr_overwrite));
 //    assert_that(state.command->exit_code, is_equal_to(0));
