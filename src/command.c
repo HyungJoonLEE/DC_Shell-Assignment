@@ -16,6 +16,7 @@ char* ltrim(char *s);
 
 void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command) {
 
+    // STDERR
     char* after_err_reg = strdup(regex_match(command->line, 2));
     if (strstr(after_err_reg, ">>") != NULL) {
         command->stderr_overwrite = true;
@@ -38,29 +39,73 @@ void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct s
     char *err_ref = strdup(after_err_reg);
     free(after_err_reg);
 
+
+
+    // STDOUT
     char* after_out_reg = strdup(regex_match(command->line, 1));
     if (strstr(after_out_reg, ">>") != NULL) {
         command->stdout_overwrite = true;
     }
-    printf("1st regex :%s\n", after_out_reg);
+//    printf("1st regex :%s\n", after_out_reg);
 
     size_t len = strlen(after_out_reg) - strlen(err_ref) + 1;
     char out_err[len];
-    strncpy(out_err, after_out_reg, strlen(after_out_reg) - strlen(err_ref) + 1);
+    strncpy(out_err, after_out_reg, len);
     out_err[len - 1] = '\0';
-    printf("out_err : %s\n", out_err);
+//    printf("out_err : %s\n", out_err);
 
     char* after_out_reg_2 = strdup(regex_match(out_err, 4));
     if (strcmp(after_out_reg_2, "") == 0) {
         command->stdout_file = NULL;
     }
     else {
-        command->stdout_file = after_out_reg_2;
-        printf("2nd regex :%s\n", after_out_reg_2);
+//        command->stdout_file = after_out_reg_2;
+//        printf("2nd regex :%s\n", after_out_reg_2);
         command->stdout_file = wrd_process(after_out_reg_2);
         free(after_out_reg_2);
     }
+    char* out_ref = strdup(after_out_reg);
     free(after_out_reg);
+    free(err_ref);
+
+
+    // STDIN
+    char* after_in_reg = strdup(regex_match(command->line, 0));
+//    printf("stdin 1st regex: %s\n", after_in_reg);
+//    printf("out_ref = %s\n", out_ref);
+
+    char *trim_air = strdup(ltrim(after_in_reg));  //
+    char *trim_or = strdup(ltrim(out_ref)); //
+//    printf("after in reg len = %lu\n ", strlen(trim_air));
+//    printf("out ref len = %lu\n ", strlen(trim_or));
+    int len2 = (int)(strlen(trim_air) - strlen(trim_or));
+    if (len2 <= 0) {
+        command->stdin_file = NULL;
+    }
+    else {
+        char in_out_err[len2];
+        strncpy(in_out_err, trim_air, len2);
+        in_out_err[len2] = '\0';
+//        printf("in_out_err : %s\n", in_out_err);
+        char* after_in_reg_2 = strdup(regex_match(in_out_err, 5));
+        if (strcmp(after_in_reg_2, "") == 0) {
+            command->stdin_file = NULL;
+        }
+        else {
+//            command->stdin_file = after_in_reg_2;
+//            printf("2nd regex :%s\n", after_in_reg_2);
+            command->stdin_file = wrd_process(after_in_reg_2);
+            free(after_in_reg_2);
+        }
+    }
+    free(trim_air);
+    free(trim_or);
+    free(after_in_reg);
+
+
+
+
+
 
     /**
      * FREE <tokenize_command>
@@ -81,19 +126,22 @@ char* regex_match(char* string, int num) {
 
     switch(num) {
         case 0:
-            status = regcomp(&regex, "[ \\t\\f\\v]<.*", REG_EXTENDED);
+            status = regcomp(&regex, "[ \\t\\f\\v]<.*", REG_EXTENDED);//in
             break;
         case 1:
-            status = regcomp(&regex, "[ \\t\\f\\v][1^2]?>[>]?.*", REG_EXTENDED);
+            status = regcomp(&regex, "[ \\t\\f\\v][1^2]?>[>]?.*", REG_EXTENDED);//out
             break;
         case 2:
-            status = regcomp(&regex, "[ \\t\\f\\v]2>[>]?.*", REG_EXTENDED);
+            status = regcomp(&regex, "[ \\t\\f\\v]2>[>]?.*", REG_EXTENDED);//err
             break;
         case 3:
-            status = regcomp(&regex, "[^> *]*$", REG_EXTENDED);
+            status = regcomp(&regex, "[^> *]*$", REG_EXTENDED);//err2
             break;
         case 4:
-            status = regcomp(&regex, "[^< *]*$", REG_EXTENDED);
+            status = regcomp(&regex, "[^< *]*$", REG_EXTENDED);//ou2
+            break;
+        case 5:
+            status = regcomp(&regex, "[^<*]*.$", REG_EXTENDED);//in2
             break;
     }
 
