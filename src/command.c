@@ -98,6 +98,7 @@ void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct s
             free(after_in_reg_2);
         }
     }
+
     free(trim_air);
     free(trim_or);
     free(after_in_reg);
@@ -110,17 +111,27 @@ void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct s
     strncpy(command_arr, command->line, len3);
     command_arr[len3] = '\0';
 //    printf("command_arr = %s\n", command_arr);
+
+    // command->argc ????????????????????
+    size_t argc_count = wrd_count(command_arr);
+    if (argc_count == 0) {
+        argc_count++;
+    }
+    command->argc = argc_count;
+
+
+
     strtok(command_arr, " ");
 //    printf("command_arr = %s\n", command_arr);
 //    printf("len : %d\n", strlen(command_arr));
     command->command = strdup(command_arr);
+//    printf("command :%s\n", command->command);
     free(after_in);
 
 
     // NEED TO WORK FROM HERE
-    command->argc = wrd_count(command->line) + 1;
-
-
+    char** argv_arr[command->argc + 2];
+    command->argv = (char **) argv_arr;
 }
 
 

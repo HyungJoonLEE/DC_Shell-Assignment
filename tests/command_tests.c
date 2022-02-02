@@ -221,8 +221,8 @@ static void test_parse_command(const char *expected_line,
     assert_that(state.command->line, is_equal_to_string(expected_line));
     assert_that(state.command->command, is_equal_to_string(expected_command));
     assert_that(state.command->argc, is_equal_to(expected_argc));
-//
-//    assert_that(state.command->argv[0], is_null);
+
+    assert_that(state.command->argv[0], is_null);
 //    assert_that(state.command->argv[expected_argc], is_null);
 //
 //    for(size_t i = 1; i < expected_argc; i++)
@@ -236,9 +236,9 @@ static void test_parse_command(const char *expected_line,
     assert_that(state.command->stderr_file, is_equal_to_string(expanded_stderr_file));
     assert_that(state.command->stderr_overwrite, is_equal_to(expected_stderr_overwrite));
 //    assert_that(state.command->exit_code, is_equal_to(0));
-//    free(expanded_stdin_file);
-//    free(expanded_stdout_file);
-//    free(expanded_stderr_file);
+    free(expanded_stdin_file);
+    free(expanded_stdout_file);
+    free(expanded_stderr_file);
 //    destroy_state(&environ, &error, &state);
 }
 
