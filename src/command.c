@@ -10,10 +10,10 @@ char* err_func(const struct dc_posix_env *env, struct dc_error *err,struct state
 char* out_func(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command, char* string);
 char* in_func(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command, char* out_ref);
 char* cmdcmd_func(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command);
-size_t argc_count(char* string);
 char **parse_space(const struct dc_posix_env *env, struct dc_error *err, const char *path_str);
 char* wrd_process(char* string);
-size_t wrd_count(char* string);
+size_t wrd_argc(char* string);
+void wrd_argv(char* string, struct command *command);
 char* ltrim(char *s);
 
 
@@ -24,12 +24,11 @@ void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct s
 //    printf("after out regex :%s\n", after_out_regex);
     char* after_in_regex = strdup(in_func(env, err, state, command, after_out_regex));
 //    printf("after in regex :%s\n", after_in_regex);
-//    free(after_in_regex);
-//    free(after_out_regex);
-//    free(after_err_regex);
+    wrd_argv(after_in_regex, command);
 
-
-
+    free(after_in_regex);
+    free(after_out_regex);
+    free(after_err_regex);
 
 }
 
@@ -220,22 +219,22 @@ char* wrd_process(char* string) {
     }
     return ptr;
 }
-//
-//
-//size_t wrd_count(char* string) {
-//    wordexp_t exp;
-//    int status;
-//    size_t count = 0;
-//
-//    status = wordexp(string, &exp, 0);
-//    if (status == 0) {
-//        count = exp.we_wordc;
-//        wordfree(&exp);
-//    }
-//    return count;
-//}
-//
-//
+
+
+size_t wrd_argc(char* string) {
+    wordexp_t exp;
+    int status;
+    size_t count = 0;
+
+    status = wordexp(string, &exp, 0);
+    if (status == 0) {
+        count = exp.we_wordc;
+        wordfree(&exp);
+    }
+    return count;
+}
+
+
 char* ltrim(char *s) {
     char* begin;
     begin = s;
@@ -249,4 +248,23 @@ char* ltrim(char *s) {
         }
     }
     return s;
+}
+
+
+void wrd_argv(char* string, struct command *command) {
+    wordexp_t exp;
+    int status;
+
+    status = wordexp(string, &exp, 0);
+
+    if (status == 0) {
+        command->argv = calloc(exp.we_wordc + 2,sizeof(char*));
+        command->argc = exp.we_wordc;
+//        printf("argc = %d\n", exp.we_wordc);
+        for (size_t i = 1; i < exp.we_wordc; i++) {
+            command->argv[i] = strdup(exp.we_wordv[i]);
+        }
+        command->command = strdup(exp.we_wordv[0]);
+        wordfree(&exp);
+    }
 }
