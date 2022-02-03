@@ -259,33 +259,33 @@ static void expand_path(const char *expected_file, char **expanded_file)
     }
 }
 
-//Ensure(command, destroy_command)
-//{
-//    test_destroy_command("ls");
-//    test_destroy_command("ls -al");
-//    test_destroy_command("ls -al < in > out 2> err");
-//}
-//
-//static void test_destroy_command(const char *expected_line)
-//{
-//    struct state state;
-//
-//    state.stdin = NULL;
-//    state.stdout = NULL;
-//    state.stderr = NULL;
-//    init_state(&environ, &error, &state);
-//    state.command = calloc(1, sizeof(struct command));
-//    state.command->line = strdup(expected_line);
-//    parse_command(&environ, &error, &state, state.command);
-//    destroy_command(&environ, state.command);
-//    assert_that(state.command->line, is_null);
-//    assert_that(state.command->command, is_null);
-//    assert_that(state.command->argv, is_null);
-//    assert_that(state.command->stdin_file, is_null);
-//    assert_that(state.command->stdout_file, is_null);
-//    assert_that(state.command->stderr_file, is_null);
-//    destroy_state(&environ, &error, &state);
-//}
+Ensure(command, destroy_command)
+{
+    test_destroy_command("ls");
+    test_destroy_command("ls -al");
+    test_destroy_command("ls -al < in > out 2> err");
+}
+
+static void test_destroy_command(const char *expected_line)
+{
+    struct state state;
+
+    state.stdin = NULL;
+    state.stdout = NULL;
+    state.stderr = NULL;
+    init_state(&environ, &error, &state);
+    state.command = calloc(1, sizeof(struct command));
+    state.command->line = strdup(expected_line);
+    parse_command(&environ, &error, &state, state.command);
+    destroy_command(&environ, state.command);
+    assert_that(state.command->line, is_null);
+    assert_that(state.command->command, is_null);
+    assert_that(state.command->argv, is_null);
+    assert_that(state.command->stdin_file, is_null);
+    assert_that(state.command->stdout_file, is_null);
+    assert_that(state.command->stderr_file, is_null);
+    destroy_state(&environ, &error, &state);
+}
 
 TestSuite *command_tests(void)
 {
@@ -293,7 +293,7 @@ TestSuite *command_tests(void)
 
     suite = create_test_suite();
     add_test_with_context(suite, command, parse_command);
-//    add_test_with_context(suite, command, destroy_command);
+    add_test_with_context(suite, command, destroy_command);
 
     return suite;
 }

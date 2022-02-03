@@ -33,6 +33,28 @@ void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct s
 }
 
 
+void destroy_command(const struct dc_posix_env *env, struct command *command) {
+    if (command != NULL) {
+        free(command->line);
+        command->line = NULL;
+        free(command->command);
+        command->command = NULL;
+        for (size_t i = 0; i < command->argc; i++) {
+            free(command->argv[i]);
+            command->argv[i] = NULL;
+        }
+        command->argv = NULL;
+        free(command->stdin_file);
+        command->stdin_file = NULL;
+        free(command->stdout_file);
+        command->stdout_file = NULL;
+        free(command->stderr_file);
+        command->stderr_file = NULL;
+    }
+}
+
+
+
 char* err_func(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command, char* string) {
     regex_t regex;
     regmatch_t match;
