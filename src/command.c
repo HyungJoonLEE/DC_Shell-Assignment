@@ -24,9 +24,9 @@ void parse_command(const struct dc_posix_env *env, struct dc_error *err,struct s
 //    printf("after out regex :%s\n", after_out_regex);
     char* after_in_regex = strdup(in_func(env, err, state, command, after_out_regex));
 //    printf("after in regex :%s\n", after_in_regex);
-    free(after_in_regex);
-    free(after_out_regex);
-    free(after_err_regex);
+//    free(after_in_regex);
+//    free(after_out_regex);
+//    free(after_err_regex);
 
 
 
@@ -65,7 +65,6 @@ char* err_func(const struct dc_posix_env *env, struct dc_error *err,struct state
         strncpy(str, &string[match.rm_so], length);
         str[length] = '\0';
 //        printf("Position: %lld\n", match.rm_so);
-        printf("str :%s\n", str);
 
         int offset = 3;
         if (strstr(str, ">>") != NULL) {
@@ -143,10 +142,9 @@ char* out_func(const struct dc_posix_env *env, struct dc_error *err,struct state
         char *changed_str = malloc(sizeof(char) * (unsigned long long int) match.rm_so + 1);
         strncpy(changed_str, string, match.rm_so);
         changed_str[match.rm_so] = '\0';
+
         return changed_str;
     }
-    printf("overwrite in source: %d\n", command->stdout_overwrite);
-
     return string;
 }
 
@@ -186,7 +184,6 @@ char* in_func(const struct dc_posix_env *env, struct dc_error *err,struct state 
 
         int offset = 2;
         if (strstr(str, "<") != NULL) {
-            command->stdout_overwrite = true;
             offset++;
         }
 
@@ -208,35 +205,9 @@ char* in_func(const struct dc_posix_env *env, struct dc_error *err,struct state 
     }
     return string;
 }
-//
-//
-//char* cmdcmd_func(const struct dc_posix_env *env, struct dc_error *err, struct state *state, struct command *command) {
-//    char* after_in = strdup(regex_match(command->line, 0));
-//    size_t len3 = strlen(command->line) - strlen(after_in) + 1;
-//    char command_arr[len3];
-//    strncpy(command_arr, command->line, len3);
-//    command_arr[len3] = '\0';
-//    strtok(command_arr, " ");
-////    printf("command_arr = %s\n", command_arr);
-////    printf("len : %d\n", strlen(command_arr));
-//    command->command = strdup(command_arr);
-////    printf("command :%s\n", command->command);
-//    free(after_in);
-//    return strdup(command_arr);
-//}
-//
-//
-//size_t argc_count(char* cmdcmd) {
-//    size_t count = wrd_count(cmdcmd);
-//    printf("cmdcmd :%s\n", cmdcmd );
-//    if (count == 0) {
-//        count++;
-//    }
-//    return count;
-//}
-//
-//
-//
+
+
+
 char* wrd_process(char* string) {
     wordexp_t exp;
     int status;
