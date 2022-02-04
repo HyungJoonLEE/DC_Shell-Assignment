@@ -31,31 +31,31 @@ Ensure(builtin, builtin_cd)
     char template[16];
     char message[1024];
 
-//    argv = dc_strs_to_array(&environ, &error, 3, NULL, "/", NULL);
-//    test_builtin_cd("cd /\n", "cd", 2, argv, "/", NULL);
-//
-//    dc_expand_path(&environ, &error, &path, "~");
-//    argv = dc_strs_to_array(&environ, &error, 3, NULL, path, NULL);
-//    test_builtin_cd("cd ~\n", "cd", 2, argv, path, NULL);
-//    free(path);
-//
-//    dc_expand_path(&environ, &error, &path, "~/");
-//    // remove the trailing space
-//    path[strlen(path) - 1] = '\0';
-//    argv = dc_strs_to_array(&environ, &error, 3, NULL, path, NULL);
-//    test_builtin_cd("cd ~\n", "cd", 2, argv, path, NULL);
-//    free(path);
-//
-//    chdir("/");
-//    dc_expand_path(&environ, &error, &path, "~");
-//    argv = dc_strs_to_array(&environ, &error, 2, NULL, NULL);
-//    test_builtin_cd("cd\n", "cd", 1, argv, path, NULL);
-//    free(path);
-//
-//    chdir("/tmp");
-//    argv = dc_strs_to_array(&environ, &error, 3, NULL, "/dev/null", NULL);
-//    test_builtin_cd("cd /dev/null\n", "cd", 2, argv, "/tmp", "/dev/null: is not a directory\n");
-//    dc_error_reset(&error);
+    argv = dc_strs_to_array(&environ, &error, 3, NULL, "/", NULL);
+    test_builtin_cd("cd /\n", "cd", 2, argv, "/", NULL);
+
+    dc_expand_path(&environ, &error, &path, "~");
+    argv = dc_strs_to_array(&environ, &error, 3, NULL, path, NULL);
+    test_builtin_cd("cd ~\n", "cd", 2, argv, path, NULL);
+    free(path);
+
+    dc_expand_path(&environ, &error, &path, "~/");
+    // remove the trailing space
+    path[strlen(path) - 1] = '\0';
+    argv = dc_strs_to_array(&environ, &error, 3, NULL, path, NULL);
+    test_builtin_cd("cd ~\n", "cd", 2, argv, path, NULL);
+    free(path);
+
+    chdir("/");
+    dc_expand_path(&environ, &error, &path, "~");
+    argv = dc_strs_to_array(&environ, &error, 2, NULL, NULL);
+    test_builtin_cd("cd\n", "cd", 1, argv, path, NULL);
+    free(path);
+
+    chdir("/tmp");
+    argv = dc_strs_to_array(&environ, &error, 3, NULL, "/dev/null", NULL);
+    test_builtin_cd("cd /dev/null\n", "cd", 2, argv, "/tmp", "/dev/null: is not a directory\n");
+    dc_error_reset(&error);
 
     strcpy(template, "/tmp/fileXXXXXX");
     mkdtemp(template);
