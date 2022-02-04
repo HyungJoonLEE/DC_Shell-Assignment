@@ -265,53 +265,51 @@ static void test_separate_commands(const char *command, const char *expected_com
     destroy_state(&environ, &error, &state);
 }
 
-//Ensure(shell_impl, parse_commands)
-//{
-//    test_parse_commands("hello\n", "hello", 1);
-//    test_parse_commands("./a.out a b c\n", "./a.out", 4);
-//}
-//
-//static void test_parse_commands(const char *command, const char *expected_command, size_t expected_argc)
-//{
-//    char *in_buf;
-//    char out_buf[1024];
-//    FILE *in;
-//    FILE *out;
-//    struct state state;
-//    int next_state;
-//
-//    in_buf = strdup(command);
-//    in = fmemopen(in_buf, strlen(in_buf) + 1, "r");
-//    out = fmemopen(out_buf, sizeof(out_buf), "w");
-//    state.stdin = in;
-//    state.stdout = out;
-//    state.stderr = stderr;
-//    unsetenv("PS1");
-//
-//    next_state = init_state(&environ, &error, &state);
-//    assert_false(dc_error_has_error(&error));
-//    assert_false(state.fatal_error);
-//    assert_that(next_state, is_equal_to(READ_COMMANDS));
-//
-//    next_state = read_commands(&environ, &error, &state);
-//    assert_that(next_state, is_equal_to(SEPARATE_COMMANDS));
-//    assert_false(state.fatal_error);
-//
-//    next_state = separate_commands(&environ, &error, &state);
-//    assert_that(next_state, is_equal_to(PARSE_COMMANDS));
-//
-//    next_state = parse_commands(&environ, &error, &state);
-//    assert_that(next_state, is_equal_to(EXECUTE_COMMANDS));
-//    printf("====O==== >> %s\n", state.command->command);
-//    printf("========= >> %s\n", expected_command);
-//    assert_that(state.command->command, is_equal_to_string(expected_command));
-//    assert_that(state.command->argc, is_equal_to(expected_argc));
-//
-//    destroy_state(&environ, &error, &state);
-//    free(in_buf);
-//    fclose(in);
-//    fclose(out);
-//}
+Ensure(shell_impl, parse_commands)
+{
+    test_parse_commands("hello\n", "hello", 1);
+    test_parse_commands("./a.out a b c\n", "./a.out", 4);
+}
+
+static void test_parse_commands(const char *command, const char *expected_command, size_t expected_argc)
+{
+    char *in_buf;
+    char out_buf[1024];
+    FILE *in;
+    FILE *out;
+    struct state state;
+    int next_state;
+
+    in_buf = strdup(command);
+    in = fmemopen(in_buf, strlen(in_buf) + 1, "r");
+    out = fmemopen(out_buf, sizeof(out_buf), "w");
+    state.stdin = in;
+    state.stdout = out;
+    state.stderr = stderr;
+    unsetenv("PS1");
+
+    next_state = init_state(&environ, &error, &state);
+    assert_false(dc_error_has_error(&error));
+    assert_false(state.fatal_error);
+    assert_that(next_state, is_equal_to(READ_COMMANDS));
+
+    next_state = read_commands(&environ, &error, &state);
+    assert_that(next_state, is_equal_to(SEPARATE_COMMANDS));
+    assert_false(state.fatal_error);
+
+    next_state = separate_commands(&environ, &error, &state);
+    assert_that(next_state, is_equal_to(PARSE_COMMANDS));
+
+    next_state = parse_commands(&environ, &error, &state);
+    assert_that(next_state, is_equal_to(EXECUTE_COMMANDS));
+    assert_that(state.command->command, is_equal_to_string(expected_command));
+    assert_that(state.command->argc, is_equal_to(expected_argc));
+
+    destroy_state(&environ, &error, &state);
+    free(in_buf);
+    fclose(in);
+    fclose(out);
+}
 //
 //Ensure(shell_impl, execute_commands)
 //{
@@ -465,7 +463,7 @@ TestSuite *shell_impl_tests(void)
     add_test_with_context(suite, shell_impl, reset_state);
     add_test_with_context(suite, shell_impl, read_commands);
     add_test_with_context(suite, shell_impl, separate_commands);
-//    add_test_with_context(suite, shell_impl, parse_commands);
+    add_test_with_context(suite, shell_impl, parse_commands);
 //    add_test_with_context(suite, shell_impl, execute_commands);
 //    add_test_with_context(suite, shell_impl, do_exit);
 //    add_test_with_context(suite, shell_impl, handle_error);

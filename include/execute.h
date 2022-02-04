@@ -33,5 +33,8 @@
  * @param path the directories to search for the command
  */
 void execute(const struct dc_posix_env *env, struct dc_error *err, struct command *command, char **path);
+void redirect(const struct dc_posix_env *env, struct dc_error *err, struct command *command);
+int run(const struct dc_posix_env *env, struct dc_error *err, struct command *command, char** path);
+int handle_run_error(struct dc_error *err, struct command *command);
 
 #endif // DC_SHELL_EXECUTE_H

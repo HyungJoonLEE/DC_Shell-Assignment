@@ -257,5 +257,27 @@ int separate_commands(const struct dc_posix_env *env, struct dc_error *err, void
 }
 
 
+int parse_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
+    struct state *states;
+    states = (struct state*) arg;
+
+    struct command *commands;
+    commands = states->command;
+
+    parse_command(env, err, states, commands);
+    if (dc_error_has_error(err)) {
+        return ERROR;
+    }
+
+    return EXECUTE_COMMANDS;
+}
+
+
+int execute_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
+
+}
+
+
+
 
 

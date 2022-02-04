@@ -9,10 +9,7 @@ char* regex_match(char* string, int num);
 char* err_func(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command, char* string);
 char* out_func(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command, char* string);
 char* in_func(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command, char* out_ref);
-char* cmdcmd_func(const struct dc_posix_env *env, struct dc_error *err,struct state *state, struct command *command);
-char **parse_space(const struct dc_posix_env *env, struct dc_error *err, const char *path_str);
 char* wrd_process(char* string);
-size_t wrd_argc(char* string);
 void wrd_argv(char* string, struct command *command);
 char* ltrim(char *s);
 
@@ -92,6 +89,7 @@ char* err_func(const struct dc_posix_env *env, struct dc_error *err,struct state
             command->stderr_overwrite = true;
             offset++;
         }
+        free(str);
 
         unsigned long long int cut_len = ((unsigned long long int) (match.rm_eo - match.rm_so)) -
                                          (unsigned long long int) offset;
@@ -148,6 +146,7 @@ char* out_func(const struct dc_posix_env *env, struct dc_error *err,struct state
             command->stdout_overwrite = true;
             offset++;
         }
+        free(str);
 
 
         unsigned long long int cut_len = ((unsigned long long int) (match.rm_eo - match.rm_so)) -
@@ -207,6 +206,7 @@ char* in_func(const struct dc_posix_env *env, struct dc_error *err,struct state 
         if (strstr(str, "<") != NULL) {
             offset++;
         }
+        free(str);
 
 
         unsigned long long int cut_len = ((unsigned long long int) (match.rm_eo - match.rm_so) -
@@ -240,20 +240,6 @@ char* wrd_process(char* string) {
         wordfree(&exp);
     }
     return ptr;
-}
-
-
-size_t wrd_argc(char* string) {
-    wordexp_t exp;
-    int status;
-    size_t count = 0;
-
-    status = wordexp(string, &exp, 0);
-    if (status == 0) {
-        count = exp.we_wordc;
-        wordfree(&exp);
-    }
-    return count;
 }
 
 
