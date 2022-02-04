@@ -11,6 +11,7 @@
 #include "util.h"
 #include "shell.h"
 #include "input.h"
+#include "builtins.h"
 
 
 regex_t regex;
@@ -119,16 +120,15 @@ int destroy_state(const struct dc_posix_env *env, struct dc_error *err, void *ar
     struct state *states;
     states = (struct state*) arg;
 
-    if (dc_error_has_no_error(err)) {
-        states->fatal_error = false;
-        states->in_redirect_regex = NULL;
-        states->out_redirect_regex = NULL;
-        states->err_redirect_regex = NULL;
-        states->prompt = NULL;
-        states->path = NULL;
-        states->max_line_length = 0;
-        states->current_line = NULL;
-    }
+    states->fatal_error = false;
+    states->in_redirect_regex = NULL;
+    states->out_redirect_regex = NULL;
+    states->err_redirect_regex = NULL;
+    states->prompt = NULL;
+    states->path = NULL;
+    states->max_line_length = 0;
+    states->current_line = NULL;
+    destroy_command(env, states->command);
 
     return DC_FSM_EXIT;
 }
@@ -274,10 +274,53 @@ int parse_commands(const struct dc_posix_env *env, struct dc_error *err, void *a
 
 
 int execute_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
+    struct state *states;
+    states = (struct state*) arg;
 
+    if (strcmp(states->command->command, "cd") == 0) {
+        builtin_cd(env, err, states->command, states->stderr);
+    }
+    else if(strcmp(states->command->command, "exit") == 0) {
+        return EXIT;
+    }
+    else {
+        execute(env, err, states->command, states->path);
+        if (dc_error_has_error(err)) {
+            states->fatal_error = true;
+        }
+    }
+
+    fprintf(states->stdout, "%d\n", states->command->exit_code);
+    if (states->fatal_error == true) {
+        return ERROR;
+    }
+    return RESET_STATE;
 }
 
 
+int do_exit(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
+    struct state *states;
+    states = (struct state*) arg;
 
+    do_reset_state(env, err, states);
+    return DESTROY_STATE;
+}
+
+
+int handle_error(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
+    struct state *states;
+    states = (struct state*) arg;
+
+    if(states->current_line == NULL) {
+        fprintf(states->stderr, "internal error (%d) %s: \"%s\"\n", err->err_code, err->message, states->current_line);
+    }
+    else {
+        fprintf(states->stderr, "internal error (%d) %s: \"%s\"\n", err->err_code, err->message, states->current_line);
+    }
+    if (states->fatal_error == true) {
+        return DESTROY_STATE;
+    }
+    return RESET_STATE;
+}
 
 

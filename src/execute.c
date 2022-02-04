@@ -28,12 +28,12 @@ void execute(const struct dc_posix_env *env, struct dc_error *err, struct comman
         exit(status);
     }
     else {
-        int status;
+        int status = 0;
         waitpid(pid, &status, 0);
-        command->exit_code = status;
+
         if (WIFEXITED(status)) {
-            int es = WEXITSTATUS(status);
-            command->exit_code = es;
+            int exit_code = WEXITSTATUS(status);
+            command->exit_code = exit_code;
         }
     }
 }
@@ -114,6 +114,7 @@ int run(const struct dc_posix_env *env, struct dc_error *err, struct command *co
                         break;
                     }
                 }
+                free(cmd);
             }
         }
     }

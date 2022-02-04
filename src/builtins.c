@@ -21,8 +21,8 @@ void builtin_cd(const struct dc_posix_env *env, struct dc_error *err, struct com
         dc_chdir(env, err, command->argv[1]);
         work_path = strdup(command->argv[1]);
     }
-
     command->exit_code = 0;
+
 
     if (dc_error_has_error(err)) {
         if (dc_error_is_errno(err, EACCES)) {
@@ -40,11 +40,11 @@ void builtin_cd(const struct dc_posix_env *env, struct dc_error *err, struct com
         else if (dc_error_is_errno(err, ENOTDIR)) {
             fprintf(errstream, "%s: is not a directory\n", work_path);
         }
-
         command->exit_code = 1;
     }
 
     free(work_path);
+    work_path = NULL;
 }
 
 

@@ -36,6 +36,7 @@ void destroy_command(const struct dc_posix_env *env, struct command *command) {
         command->line = NULL;
         free(command->command);
         command->command = NULL;
+        command->argc = 0;
         for (size_t i = 0; i < command->argc; i++) {
             free(command->argv[i]);
             command->argv[i] = NULL;
