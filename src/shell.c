@@ -31,34 +31,36 @@ int run_shell(const struct dc_posix_env *env, struct dc_error *error, FILE *in, 
         {DESTROY_STATE,     DC_FSM_EXIT,        NULL}
     };
 
-    dc_error_init(&err, error_reporter);
-    dc_posix_env_init(&env, NULL /*trace_reporter*/);
+    dc_error_init(error, error_reporter);
+    dc_posix_env_init(env, NULL /*trace_reporter*/);
     ret_val = EXIT_SUCCESS;
-    fsm_info = dc_fsm_info_create(&env, &err, "dc_shell");
+    fsm_info = dc_fsm_info_create(env, error, "dc_shell");
 //    dc_fsm_info_set_will_change_state(fsm_info, will_change_state);
 //    dc_fsm_info_set_did_change_state(fsm_info, did_change_state);
 //    dc_fsm_info_set_bad_change_state(fsm_info, bad_change_state);
 
-    if(dc_error_has_no_error(&err))
+    if(dc_error_has_no_error(error))
     {
+
         struct state states;
         int from_state;
         int to_state;
 
+        states.stdin = in;
+        states.stdout = out;
+        states.stderr = err;
 
-        ret_val = dc_fsm_run(&env, &err, fsm_info, &from_state, &to_state, &states, transitions);
-        dc_fsm_info_destroy(&env, &fsm_info);
+        dc_fsm_run(env, error, fsm_info, &from_state, &to_state, &states, transitions);
+        dc_fsm_info_destroy(env, &fsm_info);
     }
 
-    return 0;
+    return ret_val;
 }
 
 static void error_reporter(const struct dc_error *err)
 {
     fprintf(stderr, "Error: \"%s\" - %s : %s @ %zu\n", err->message, err->file_name, err->function_name, err->line_number);
 }
-
-
 
 
 

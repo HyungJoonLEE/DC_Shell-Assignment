@@ -45,12 +45,11 @@ void redirect(const struct dc_posix_env *env, struct dc_error *err, struct comma
         int fd;
         fd = dc_open(env, err, command->stdin_file, DC_O_RDWR|DC_O_CREAT, S_IRWXU);
 
-        if (dc_error_has_error(err)) {
-            dc_close(env, err, fd);
-            return;
+        if (dc_error_has_no_error(err)) {
+            dc_dup2(env, err, fd, STDIN_FILENO);
         }
 
-        dc_dup2(env, err, fd, STDIN_FILENO);
+        dc_close(env, err, fd);
     }
 
 
@@ -64,12 +63,11 @@ void redirect(const struct dc_posix_env *env, struct dc_error *err, struct comma
             fd = dc_open(env, err, command->stdout_file, DC_O_CREAT | DC_O_WRONLY | DC_O_TRUNC, S_IRWXU);
         }
 
-        if (dc_error_has_error(err)) {
-            dc_close(env, err, fd);
-            return;
+        if (dc_error_has_no_error(err)) {
+            dc_dup2(env, err, fd, STDOUT_FILENO);
         }
 
-        dc_dup2(env, err, fd, STDOUT_FILENO);
+        dc_close(env, err, fd);
     }
 
 
@@ -82,12 +80,11 @@ void redirect(const struct dc_posix_env *env, struct dc_error *err, struct comma
             fd = dc_open(env, err, command->stderr_file ,DC_O_CREAT | DC_O_WRONLY| DC_O_TRUNC, S_IRWXU);
         }
 
-        if (dc_error_has_error(err)) {
-            dc_close(env, err, fd);
-            return;
+        if (dc_error_has_no_error(err)) {
+            dc_dup2(env, err, fd, STDERR_FILENO);
         }
 
-        dc_dup2(env, err, fd, STDERR_FILENO);
+        dc_close(env, err, fd);
     }
 }
 
@@ -98,7 +95,7 @@ int run(const struct dc_posix_env *env, struct dc_error *err, struct command *co
         dc_execv(env, err, command->command, command->argv);
     }
     else {
-        if (path[0] == NULL) {
+        if (!path[0]) {
             DC_ERROR_RAISE_ERRNO(err, ENOENT);
         }
         else {

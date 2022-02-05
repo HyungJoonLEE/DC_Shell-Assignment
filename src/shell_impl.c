@@ -138,22 +138,7 @@ int destroy_state(const struct dc_posix_env *env, struct dc_error *err, void *ar
 int reset_state(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
     struct state *states;
     states = (struct state*) arg;
-
-
-    if (!dc_error_has_error(err)) {
-        states->fatal_error = false;
-        states->in_redirect_regex = regex_setting(0);
-        states->out_redirect_regex = regex_setting(1);
-        states->err_redirect_regex = regex_setting(2);
-        states->prompt = get_prompt(env, err);
-        states->path = parse_path(env, err, get_path(env, err));
-        states->max_line_length = (size_t) sysconf(_SC_ARG_MAX);
-        states->current_line = NULL;
-        states->current_line_length = 0;
-
-        free(states->command);
-        states->command = NULL;
-    }
+    do_reset_state(env, err, states);
 
     return READ_COMMANDS;
 }
@@ -211,46 +196,79 @@ int read_commands(const struct dc_posix_env *env, struct dc_error *err, void *ar
 int separate_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
     struct state *states;
     states = (struct state*) arg;
-    struct state new_states;
 
-    if (dc_error_has_no_error(err)) {
-        states->fatal_error = false;
+    states->command = dc_calloc(env, err, 1, sizeof(*states->command));
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
 
-        new_states.command = dc_calloc(env, err, 1, sizeof(*states->command));
-        states->command = new_states.command;
+    states->command->line = strdup(states->current_line);
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
 
+    states->command->command = NULL;
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
 
-        if (dc_error_has_error(err)) {
-            free(new_states.command);
+    states->command->exit_code = 0;
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
+
+    for (size_t i = 0; i < states->command->argc; i++) {
+        states->command->argv[i] = NULL;
+        if (dc_error_has_error(err)){
             states->fatal_error = true;
             return ERROR;
         }
+    }
 
-        states->command->line = strdup(states->current_line);
+    states->command->argv = NULL;
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
 
-        if (dc_error_has_error(err)) {
-            free(new_states.command);
-            free(states->current_line);
-            states->fatal_error = true;
-            return ERROR;
-        }
+    states->command->argc = 0;
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
 
-//        new_states.command->line = NULL;
-        new_states.command->command = NULL;
-        new_states.command->argc = 0;
-        new_states.command->argv = NULL;
-        new_states.command->stdin_file = NULL;
-        new_states.command->stdout_file = NULL;
-        new_states.command->stdout_overwrite = false;
-        new_states.command->stderr_file = NULL;
-        new_states.command->stderr_overwrite = false;
-        new_states.command->exit_code = 0;
+    states->command->stdin_file = NULL;
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
 
-        if (dc_error_has_error(err)) {
-            free(new_states.command);
-            states->fatal_error = true;
-            return ERROR;
-        }
+    states->command->stdout_file = NULL;
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
+
+    states->command->stderr_file = NULL;
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
+
+    states->command->stdout_overwrite = false;
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
+    }
+
+    states->command->stderr_overwrite = false;
+    if (dc_error_has_error(err)){
+        states->fatal_error = true;
+        return ERROR;
     }
 
     return PARSE_COMMANDS;
@@ -312,7 +330,7 @@ int handle_error(const struct dc_posix_env *env, struct dc_error *err, void *arg
     states = (struct state*) arg;
 
     if(states->current_line == NULL) {
-        fprintf(states->stderr, "internal error (%d) %s: \"%s\"\n", err->err_code, err->message, states->current_line);
+        fprintf(states->stderr, "internal error (%d) %s\n", err->err_code, err->message);
     }
     else {
         fprintf(states->stderr, "internal error (%d) %s: \"%s\"\n", err->err_code, err->message, states->current_line);
@@ -322,5 +340,7 @@ int handle_error(const struct dc_posix_env *env, struct dc_error *err, void *arg
     }
     return RESET_STATE;
 }
+
+
 
 
