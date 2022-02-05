@@ -169,6 +169,8 @@ int read_commands(const struct dc_posix_env *env, struct dc_error *err, void *ar
 
         if (dc_error_has_error(err)) {
             states->fatal_error = true;
+            free(rcl);
+            free(pwd);
             return ERROR;
         }
 
@@ -181,9 +183,15 @@ int read_commands(const struct dc_posix_env *env, struct dc_error *err, void *ar
         }
 
         states->current_line_length = dc_strlen(env, rcl);
+        if (dc_error_has_error(err)) {
+            free(rcl);
+            free(pwd);
+            states->fatal_error = true;
+            return ERROR;
+        }
+
         free(rcl);
         free(pwd);
-
 
         if (len == 0) {
             return RESET_STATE;
@@ -203,7 +211,7 @@ int separate_commands(const struct dc_posix_env *env, struct dc_error *err, void
         return ERROR;
     }
 
-    states->command->line = strdup(states->current_line);
+    states->command->line = dc_strdup(env, err, states->current_line);
     if (dc_error_has_error(err)){
         states->fatal_error = true;
         return ERROR;
@@ -279,10 +287,7 @@ int parse_commands(const struct dc_posix_env *env, struct dc_error *err, void *a
     struct state *states;
     states = (struct state*) arg;
 
-    struct command *commands;
-    commands = states->command;
-
-    parse_command(env, err, states, commands);
+    parse_command(env, err, states, states->command);
     if (dc_error_has_error(err)) {
         return ERROR;
     }

@@ -48,6 +48,7 @@ void destroy_command(const struct dc_posix_env *env, struct command *command) {
         command->stdout_file = NULL;
         free(command->stderr_file);
         command->stderr_file = NULL;
+        command->exit_code = 0;
     }
 }
 

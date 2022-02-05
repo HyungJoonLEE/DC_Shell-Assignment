@@ -99,7 +99,7 @@ void display_state(const struct dc_posix_env *env, const struct state *state, FI
 
 
 void do_reset_state(const struct dc_posix_env *env, struct dc_error *err, struct state *state) {
-    state->fatal_error = NULL;
+    state->fatal_error = false;
     state->current_line = NULL;
     state->current_line_length = 0;
     destroy_command(env, state->command);
