@@ -27,10 +27,10 @@ void execute(const struct dc_posix_env *env, struct dc_error *err, struct comman
         status = handle_run_error(err, command);
         exit(status);
     }
-    else {
-        int status = 0;
-        waitpid(pid, &status, 0);
 
+    else {
+        int status;
+        waitpid(pid, &status, 0);
         if (WIFEXITED(status)) {
             int exit_code = WEXITSTATUS(status);
             command->exit_code = exit_code;
@@ -40,10 +40,13 @@ void execute(const struct dc_posix_env *env, struct dc_error *err, struct comman
 
 
 void redirect(const struct dc_posix_env *env, struct dc_error *err, struct command *command) {
+//    printf("This is stdin :%s:\n", command->stdin_file);
+//    printf("This is stdout :%s:\n", command->stdout_file);
+//    printf("This is stderr :%s:\n", command->stderr_file);
 
     if (command->stdin_file != NULL) {
         int fd;
-        fd = dc_open(env, err, command->stdin_file, DC_O_RDWR|DC_O_CREAT, S_IRWXU);
+        fd = dc_open(env, err, command->stdin_file, DC_O_RDWR, S_IRWXO | S_IRWXG | S_IRWXU);
 
         if (dc_error_has_no_error(err)) {
             dc_dup2(env, err, fd, STDIN_FILENO);
@@ -57,10 +60,10 @@ void redirect(const struct dc_posix_env *env, struct dc_error *err, struct comma
         int fd;
 
         if (command->stdout_overwrite == true) {
-            fd = dc_open(env, err, command->stdout_file,  DC_O_CREAT | DC_O_WRONLY | DC_O_APPEND, S_IRWXU);
+            fd = dc_open(env, err, command->stdout_file,  DC_O_CREAT | DC_O_RDWR | DC_O_APPEND, S_IRWXU);
         }
         else {
-            fd = dc_open(env, err, command->stdout_file, DC_O_CREAT | DC_O_WRONLY | DC_O_TRUNC, S_IRWXU);
+            fd = dc_open(env, err, command->stdout_file, DC_O_CREAT | DC_O_RDWR | DC_O_TRUNC, S_IRWXU);
         }
 
         if (dc_error_has_no_error(err)) {
@@ -73,11 +76,12 @@ void redirect(const struct dc_posix_env *env, struct dc_error *err, struct comma
 
     if (command->stderr_file != NULL) {
         int fd;
+
         if (command->stderr_overwrite == true) {
-            fd = dc_open(env, err, command->stderr_file ,DC_O_CREAT | DC_O_WRONLY| DC_O_APPEND, S_IRWXU);
+            fd = dc_open(env, err, command->stderr_file ,DC_O_CREAT | DC_O_RDWR | DC_O_APPEND, S_IRWXU);
         }
         else {
-            fd = dc_open(env, err, command->stderr_file ,DC_O_CREAT | DC_O_WRONLY| DC_O_TRUNC, S_IRWXU);
+            fd = dc_open(env, err, command->stderr_file ,DC_O_CREAT | DC_O_RDWR | DC_O_TRUNC, S_IRWXU);
         }
 
         if (dc_error_has_no_error(err)) {
@@ -99,19 +103,16 @@ int run(const struct dc_posix_env *env, struct dc_error *err, struct command *co
             DC_ERROR_RAISE_ERRNO(err, ENOENT);
         }
         else {
-            for (size_t i = 0; i < command->argc; i++) {
-                char *cmd;
-                strcat(path[i], "/");
-                strcat(path[i], command->command);
-                cmd = strdup(path[i]);
-                command->argv[0] = cmd;
-                dc_execv(env, err, cmd, command->argv);
+            for (char *c = *path; c; c = *++path) {
+                strcat(c, "/");
+                strcat(c, command->command);
+                command->argv[0] = c;
+                dc_execv(env, err, c, command->argv);
                 if(dc_error_has_error(err)) {
                     if (!dc_error_is_errno(err, ENOENT)) {
                         break;
                     }
                 }
-                free(cmd);
             }
         }
     }

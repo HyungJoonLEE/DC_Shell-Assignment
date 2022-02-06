@@ -91,7 +91,6 @@ char* err_func(const struct dc_posix_env *env, struct dc_error *err,struct state
             command->stderr_overwrite = true;
             offset++;
         }
-        free(str);
 
         unsigned long long int cut_len = ((unsigned long long int) (match.rm_eo - match.rm_so)) -
                                          (unsigned long long int) offset;
@@ -105,6 +104,7 @@ char* err_func(const struct dc_posix_env *env, struct dc_error *err,struct state
         char *changed_str = malloc(sizeof(char) * (unsigned long long int) match.rm_so + 1);
         strncpy(changed_str, string, match.rm_so);
         changed_str[match.rm_so] = '\0';
+        free(str);
         return changed_str;
     }
     return string;
@@ -148,7 +148,6 @@ char* out_func(const struct dc_posix_env *env, struct dc_error *err,struct state
             command->stdout_overwrite = true;
             offset++;
         }
-        free(str);
 
 
         unsigned long long int cut_len = ((unsigned long long int) (match.rm_eo - match.rm_so)) -
@@ -164,6 +163,7 @@ char* out_func(const struct dc_posix_env *env, struct dc_error *err,struct state
         char *changed_str = malloc(sizeof(char) * (unsigned long long int) match.rm_so + 1);
         strncpy(changed_str, string, match.rm_so);
         changed_str[match.rm_so] = '\0';
+        free(str);
 
         return changed_str;
     }
@@ -177,7 +177,7 @@ char* in_func(const struct dc_posix_env *env, struct dc_error *err,struct state 
     int status;
     int matched;
 
-    status = regcomp(&regex, "[ \\t\\f\\v]<.*", REG_EXTENDED);//err
+    status = regcomp(&regex, "[ \\t\\f\\v]<.*", REG_EXTENDED);
     matched = regexec(&regex, string,  1, &match, 0);
 
     if (status != 0) {
@@ -205,10 +205,6 @@ char* in_func(const struct dc_posix_env *env, struct dc_error *err,struct state 
 //        printf("str :%s\n", str);
 
         int offset = 2;
-        if (strstr(str, "<") != NULL) {
-            offset++;
-        }
-        free(str);
 
 
         unsigned long long int cut_len = ((unsigned long long int) (match.rm_eo - match.rm_so) -
@@ -224,6 +220,7 @@ char* in_func(const struct dc_posix_env *env, struct dc_error *err,struct state 
         char *changed_str = malloc(sizeof(char) * (unsigned long long int) match.rm_so + 1);
         strncpy(changed_str, string, match.rm_so);
         changed_str[match.rm_so] = '\0';
+        free(str);
         return changed_str;
     }
     return string;

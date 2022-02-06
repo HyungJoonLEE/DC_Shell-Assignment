@@ -231,7 +231,6 @@ static void test_separate_commands(const char *command, const char *expected_com
     next_state = read_commands(&environ, &error, &state);
     assert_that(next_state, is_equal_to(expected_return));
     assert_false(state.fatal_error);
-
     assert_that(state.current_line, is_equal_to_string(expected_command));
     assert_that(state.current_line_length, is_equal_to(strlen(expected_command)));
 
@@ -302,6 +301,7 @@ static void test_parse_commands(const char *command, const char *expected_comman
 
     next_state = parse_commands(&environ, &error, &state);
     assert_that(next_state, is_equal_to(EXECUTE_COMMANDS));
+
     assert_that(state.command->command, is_equal_to_string(expected_command));
     assert_that(state.command->argc, is_equal_to(expected_argc));
 
@@ -322,6 +322,7 @@ Ensure(shell_impl, execute_commands)
     assert_that(current_working_dir, is_equal_to_string("/"));
     free(current_working_dir);
 
+    test_execute_command("cd /dev/null", RESET_STATE, "1\n", "/dev/null: is not a directory\n");
     current_working_dir = dc_get_working_dir(&environ, &error);
     assert_that(current_working_dir, is_equal_to_string("/"));
     free(current_working_dir);

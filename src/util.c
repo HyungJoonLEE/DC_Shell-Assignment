@@ -100,19 +100,11 @@ void display_state(const struct dc_posix_env *env, const struct state *state, FI
 
 void do_reset_state(const struct dc_posix_env *env, struct dc_error *err, struct state *state) {
     state->fatal_error = false;
+    free(state->current_line);
     state->current_line = NULL;
     state->current_line_length = 0;
     destroy_command(env, state->command);
-    free(state->command);
     state->command = NULL;
-
-    free(err->message);
-    err->message = NULL;
-    err->file_name = NULL;
-    err->function_name = NULL;
-    err->line_number = 0;
-    err->type = 0;
-    err->reporter = NULL;
-    err->err_code = 0;
+    dc_error_reset(err);
 }
 

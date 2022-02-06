@@ -299,7 +299,6 @@ int parse_commands(const struct dc_posix_env *env, struct dc_error *err, void *a
 int execute_commands(const struct dc_posix_env *env, struct dc_error *err, void *arg) {
     struct state *states;
     states = (struct state*) arg;
-
     if (strcmp(states->command->command, "cd") == 0) {
         builtin_cd(env, err, states->command, states->stderr);
     }
@@ -307,12 +306,14 @@ int execute_commands(const struct dc_posix_env *env, struct dc_error *err, void 
         return EXIT;
     }
     else {
+//        printf("Before execute() : %d\n", states->command->exit_code);
         execute(env, err, states->command, states->path);
+//        printf("After execute() : %d\n", states->command->exit_code);
         if (dc_error_has_error(err)) {
             states->fatal_error = true;
         }
-    }
 
+    }
     fprintf(states->stdout, "%d\n", states->command->exit_code);
     if (states->fatal_error == true) {
         return ERROR;
