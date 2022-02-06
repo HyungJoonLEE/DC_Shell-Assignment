@@ -306,9 +306,7 @@ int execute_commands(const struct dc_posix_env *env, struct dc_error *err, void 
         return EXIT;
     }
     else {
-//        printf("Before execute() : %d\n", states->command->exit_code);
         execute(env, err, states->command, states->path);
-//        printf("After execute() : %d\n", states->command->exit_code);
         if (dc_error_has_error(err)) {
             states->fatal_error = true;
         }

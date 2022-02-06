@@ -121,15 +121,45 @@ int run(const struct dc_posix_env *env, struct dc_error *err, struct command *co
 
 
 int handle_run_error(struct dc_error *err, struct command *command) {
-    if (dc_error_is_errno(err, E2BIG)) return 1;
-    else if (dc_error_is_errno(err, EACCES)) return 2;
-    else if (dc_error_is_errno(err, EINVAL)) return 3;
-    else if (dc_error_is_errno(err, ELOOP)) return 4;
-    else if (dc_error_is_errno(err, ENAMETOOLONG)) return 5;
-    else if (dc_error_is_errno(err, ENOENT)) return 127;
-    else if (dc_error_is_errno(err, ENOTDIR)) return 6;
-    else if (dc_error_is_errno(err, ENOEXEC)) return 7;
-    else if (dc_error_is_errno(err, ENOMEM)) return 8;
-    else if (dc_error_is_errno(err, ETXTBSY)) return 9;
+    if (dc_error_is_errno(err, E2BIG)) {
+        fprintf(stderr, "Command: %s Argument list too long\n", command->command);
+        return 1;
+    }
+    else if (dc_error_is_errno(err, EACCES)) {
+        fprintf(stderr, "Command: %s Permission denied\n", command->command);
+        return 2;
+    }
+    else if (dc_error_is_errno(err, EINVAL)) {
+        fprintf(stderr, "Command: %s Invalid argument\n", command->command);
+        return 3;
+    }
+    else if (dc_error_is_errno(err, ELOOP)) {
+        fprintf(stderr, "Command: %s Too many levels of symbolic links\n", command->command);
+        return 4;
+    }
+    else if (dc_error_is_errno(err, ENAMETOOLONG)) {
+        fprintf(stderr, "Command: %s File name too long\n", command->command);
+        return 5;
+    }
+    else if (dc_error_is_errno(err, ENOENT)) {
+        fprintf(stderr, "Command: %s not found\n", command->command);
+        return 127;
+    }
+    else if (dc_error_is_errno(err, ENOTDIR)) {
+        fprintf(stderr, "Command: %s Not a directory\n", command->command);
+        return 6;
+    }
+    else if (dc_error_is_errno(err, ENOEXEC)) {
+        fprintf(stderr, "Command: %s Exec format error\n", command->command);
+        return 7;
+    }
+    else if (dc_error_is_errno(err, ENOMEM)) {
+        fprintf(stderr, "Command: %s Cannot allocate memory\n", command->command);
+        return 8;
+    }
+    else if (dc_error_is_errno(err, ETXTBSY)) {
+        fprintf(stderr, "Command: %s Text file busy\n", command->command);
+        return 9;
+    }
     else return 125;
 }
